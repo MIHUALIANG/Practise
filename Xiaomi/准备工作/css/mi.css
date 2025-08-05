@@ -36,7 +36,6 @@
 
 .wrap {
   width: 1226px;
-  height: 40px;
   margin: auto;
 }
 
@@ -72,6 +71,7 @@
   left: 50%;
   margin-left: -62px;
   overflow: hidden;
+  z-index: 1;
 }
 /* 下载二维码 */
 .download img {
@@ -106,6 +106,7 @@
   left: 50%;
   margin-left: -8px;
   display: none;
+  z-index: 1;
 }
 
 .black-nav-left > li:hover > .stri {
@@ -145,6 +146,7 @@
   color: #424242;
   overflow: hidden;
   line-height: 100px;
+  z-index: 1;
 }
 
 .cart:hover > .cart-list {
@@ -265,6 +267,7 @@
   left: 0;
   top: 100px;
   display: none;
+  z-index: 1;
 }
 
 .nav-bar li:hover > .nav-bar-list {
@@ -286,3 +289,307 @@
   color: #ff6700;
 }
 /* 白色导航 end */
+
+/* banner start */
+.banner {
+  width: 100%;
+  height: 460px;
+  position: relative;
+}
+
+.banner-img {
+  width: 100%;
+}
+
+.slide {
+  width: 234px;
+  height: 420px;
+  padding: 20px 0;
+  background-color: rgba(105, 101, 101, 0.6);
+  position: absolute;
+  top: 0;
+}
+
+.slide > ul > li {
+  height: 42px;
+  line-height: 42px;
+  text-align: left;
+  padding-left: 30px;
+  font-size: 14px;
+}
+
+.slide > ul > li > a {
+  color: #fff;
+}
+
+.slide i {
+  float: right;
+  padding-right: 20px;
+}
+
+.slide > ul > li:hover {
+  background-color: #ff6700;
+}
+
+.slide-list {
+  width: 992px;
+  height: 460px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-left: none;
+  box-sizing: border-box;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
+  position: absolute;
+  top: 0;
+  left: 234px;
+  display: none;
+  z-index: 1;
+}
+
+.slide > ul > li:hover .slide-list {
+  display: block;
+}
+
+.slide-list ul li {
+  width: 240px;
+  height: 76px;
+  float: left;
+  padding: 18px 0 18px 20px;
+  box-sizing: border-box;
+  line-height: 76px;
+  position: relative;
+}
+
+.slide-list img {
+  width: 40px;
+  position: absolute;
+  top: 25px;
+}
+
+.slide-list span {
+  color: #333;
+  font-size: 12px;
+  position: absolute;
+  top: 0px;
+  left: 55px;
+}
+
+.slide-list li span:hover {
+  color: #ff6700;
+}
+/* banner end */
+
+/* 广告模块 start */
+.ad {
+  width: 100%;
+  height: 170px;
+  padding: 14px 0;
+}
+
+.ad-aside {
+  width: 234px;
+  height: 170px;
+  background-color: #5f5750;
+  padding: 3px;
+  box-sizing: border-box;
+  font-size: 12px;
+  float: left;
+}
+
+.ad-aside ul li {
+  float: left;
+  width: 76px;
+  height: 82px;
+  padding-top: 18px;
+  box-sizing: border-box;
+  opacity: 0.7;
+}
+
+.ad-aside i {
+  font-size: 24px;
+  margin-bottom: 4px;
+  display: block;
+  /* 设置为块级元素 使得 margin-bottom生效 */
+}
+
+.ad-aside ul li a {
+  color: #fff;
+}
+
+.ad-aside ul li:hover {
+  opacity: 1;
+}
+
+.ad-img {
+  width: 316px;
+  margin-left: 14.6px;
+  height: 170px;
+  float: left;
+}
+
+.ad-img img {
+  width: 100%;
+}
+/* 广告模块 end */
+
+/* 内容模块 start */
+.content {
+  width: 100%;
+  background-color: #f1f1f1;
+  overflow: hidden;
+  padding: 4px 0 12px;
+}
+
+/* 内容模块  end*/
+
+.title {
+  text-align: left;
+  color: #333;
+  font-size: 22px;
+  font-weight: 200;
+  line-height: 58px;
+}
+
+/* 手机模块  start*/
+.phone-box {
+  width: 100%;
+  height: 614px;
+}
+
+.phone-box-left {
+  width: 234px;
+  height: 614px;
+  float: left;
+}
+
+.phone-box-right {
+  width: 992px;
+  height: 614px;
+  float: left;
+}
+
+.item {
+  float: left;
+  margin: 0 0 14px 14px;
+  width: 234px;
+  height: 300px;
+  background-color: #fff;
+  padding: 20px 0;
+  box-sizing: border-box;
+  transition: all 0.2s linear;
+}
+
+.item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.item-img {
+  width: 160px;
+  margin-bottom: 19px;
+}
+
+.item-name {
+  width: 214px;
+  height: 21px;
+  color: #333;
+  line-height: 21px;
+  margin: 0 auto 2px;
+}
+
+.item-desc {
+  width: 214px;
+  height: 18px;
+  color: #b0b0b0;
+  font-size: 12px;
+  line-height: 18px;
+  margin: 0 auto 2px;
+}
+
+.item-price {
+  color: #ff6700;
+  font-size: 14px;
+}
+
+.big-img {
+  width: 100%;
+  height: 120px;
+  margin: 22px auto 0;
+}
+/* 手机模块 end*/
+
+/* 家电模块 start */
+.elc-box {
+  width: 100%;
+  height: 614px;
+}
+
+.elc-item-left {
+  width: 234px;
+  height: 614px;
+  float: left;
+}
+
+.item-left > div {
+  padding: 0px 0;
+  margin: 0 0 14px 0;
+}
+
+item-left > div > img {
+  width: 234px;
+}
+
+.elc-item-center {
+  width: 758px;
+  height: 614px;
+  float: left;
+}
+
+.elc-item-right {
+  width: 234px;
+  height: 614px;
+  float: left;
+}
+
+.elc-item-small {
+  height: 143px;
+  margin: 0 0 14px 0;
+}
+/* 家电模块 end */
+
+/* 视频模块 start */
+.vd-box {
+  width: 100%;
+  height: 256px;
+}
+
+.vd-item {
+  float: left;
+  margin: 0 7px 0 7px;
+  width: 292.5px;
+  height: 256px;
+  background-color: #fff;
+  padding: 0px 0px 0px 0px;
+  box-sizing: border-box;
+  transition: all 0.2s linear;
+  position: relative;
+}
+
+.vd-item-img {
+  width: 292.5px;
+  margin-bottom: 15px;
+}
+
+.vd-item i {
+  position: absolute;
+  top: 150px;
+  left: 10px;
+  color: #fff;
+}
+
+.vd-item-img:hover + i {
+  /* 由于此时 img 和 i 是同级 因此要做特殊处理 */
+  color: #ff6700;
+}
+
+/* 视频模块 end*/
