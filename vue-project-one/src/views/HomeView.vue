@@ -16,6 +16,7 @@
           :collapse="isCollapse"
           @open="handleOpen"
           @close="handleClose"
+          @select="handleSelect"
         >
           <el-sub-menu index="1">
             <template #title>
@@ -60,14 +61,47 @@
             circle
           >
           </el-button>
-          <el-breadcrumb separator=">">
+          <el-breadcrumb :separator-icon="ArrowRight">
             <el-breadcrumb-item :to="{ path: '/' }">
               homepage
             </el-breadcrumb-item>
-            <el-breadcrumb-item>promotion management</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: 'about/' }"
+              >promotion management</el-breadcrumb-item
+            >
             <el-breadcrumb-item>promotion list</el-breadcrumb-item>
             <el-breadcrumb-item>promotion detail</el-breadcrumb-item>
           </el-breadcrumb>
+
+          <el-dropdown trigger="click">
+            <span class="el-dropdown-link">
+              Dropdown List
+              <el-icon class="el-icon--right"><arrow-down /> </el-icon>
+              <img class="avatar" src="../assets/zz.jpg" />
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>
+                  <el-icon><Plus /></el-icon>Action 1
+                </el-dropdown-item>
+
+                <el-dropdown-item>
+                  <el-icon><CirclePlusFilled /></el-icon>Action 2
+                </el-dropdown-item>
+
+                <el-dropdown-item>
+                  <el-icon><CirclePlus /></el-icon>Action 3
+                </el-dropdown-item>
+
+                <el-dropdown-item>
+                  <el-icon><Check /></el-icon>Action 4
+                </el-dropdown-item>
+
+                <el-dropdown-item>
+                  <el-icon><CircleCheck /></el-icon>Action 5
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </el-header>
         <el-main>Main</el-main>
       </el-container>
@@ -79,7 +113,7 @@
 import HelloWorld from '@/components/HelloWorld.vue';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
-import { Location, Star, ArrowRight } from '@element-plus/icons-vue';
+import { ArrowRight } from '@element-plus/icons-vue';
 
 export default {
   name: 'HomeView',
@@ -114,7 +148,8 @@ export default {
       handleSelect,
       toggleCollapse,
       isCollapse,
-      activeIndex
+      activeIndex,
+      ArrowRight
     };
   }
 };
