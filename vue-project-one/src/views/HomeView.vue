@@ -76,7 +76,8 @@
             <span class="el-dropdown-link">
               Dropdown List
               <el-icon class="el-icon--right"><arrow-down /> </el-icon>
-              <img class="avatar" src="../assets/zz.jpg" />
+              <el-avatar class="avatar" :src="avatarImg" />
+              <!-- <img class="avatar" src="../assets/zz.jpg" /> -->
             </span>
             <template #dropdown>
               <el-dropdown-menu>
@@ -103,7 +104,17 @@
             </template>
           </el-dropdown>
         </el-header>
-        <el-main>Main</el-main>
+
+        <el-main>
+          <div>
+            <el-date-picker
+              v-model="datevalue"
+              type="datetime"
+              placeholder="Select date and time"
+              :shortcuts="shortcuts"
+            />
+          </div>
+        </el-main>
       </el-container>
     </el-container>
   </div>
@@ -114,6 +125,7 @@ import HelloWorld from '@/components/HelloWorld.vue';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import { ArrowRight } from '@element-plus/icons-vue';
+import avatarImg from '../assets/zz.jpg';
 
 export default {
   name: 'HomeView',
@@ -125,6 +137,7 @@ export default {
     const router = useRouter();
     const isCollapse = ref(false); // 是否折叠
     const activeIndex = ref(''); // 当前激活菜单项
+    const datevalue = ref('');
 
     const toggleCollapse = () => {
       isCollapse.value = !isCollapse.value;
@@ -142,6 +155,29 @@ export default {
       console.log('close:', key, keyPath);
     };
 
+    const shortcuts = [
+      {
+        text: 'Today',
+        value: new Date()
+      },
+      {
+        text: 'Yesterday',
+        value: () => {
+          const date = new Date();
+          date.setDate(date.getDate() - 1);
+          return date;
+        }
+      },
+      {
+        text: 'A week ago',
+        value: () => {
+          const date = new Date();
+          date.setDate(date.getDate() - 7);
+          return date;
+        }
+      }
+    ];
+
     return {
       handleClose,
       handleOpen,
@@ -149,7 +185,10 @@ export default {
       toggleCollapse,
       isCollapse,
       activeIndex,
-      ArrowRight
+      ArrowRight,
+      avatarImg,
+      shortcuts,
+      datevalue
     };
   }
 };
