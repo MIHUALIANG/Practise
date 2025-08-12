@@ -24,8 +24,8 @@
               <span>Navigator One</span>
             </template>
             <el-menu-item-group title="Group One">
-              <el-menu-item index="/about">About us</el-menu-item>
-              <el-menu-item index="/information">Information</el-menu-item>
+              <el-menu-item index="/about">item one</el-menu-item>
+              <el-menu-item index="1-2">item two</el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="Group Two">
               <el-menu-item index="1-3">item three</el-menu-item>
@@ -65,7 +65,7 @@
             <el-breadcrumb-item :to="{ path: '/' }">
               homepage
             </el-breadcrumb-item>
-            <el-breadcrumb-item :to="{ path: '/' }"
+            <el-breadcrumb-item :to="{ path: 'about/' }"
               >promotion management</el-breadcrumb-item
             >
             <el-breadcrumb-item>promotion list</el-breadcrumb-item>
@@ -106,7 +106,56 @@
         </el-header>
 
         <el-main>
-          <router-view></router-view>
+          <div class="el-main">
+            <div class="mainstyle">
+              <span class="title">Name: </span>
+              <el-input
+                v-model="inputname"
+                style="width: 240px"
+                placeholder="Please input your name"
+              />
+            </div>
+            <div class="mainstyle">
+              <span class="title">Age: </span>
+              <el-input
+                v-model="inputage"
+                style="width: 240px"
+                placeholder="Please input your age"
+              />
+            </div>
+            <div class="mainstyle">
+              <span class="title">School: </span>
+              <el-select
+                v-model="value"
+                placeholder="Select"
+                style="width: 240px"
+              >
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </div>
+
+            <div class="mainstyle">
+              <span class="title">Birthday: </span>
+              <el-date-picker
+                v-model="datevalue"
+                type="datetime"
+                placeholder="Select date and time"
+                :shortcuts="shortcuts"
+              />
+            </div>
+            <div class="mainstyle">
+              <span class="title">Gender: </span>
+              <el-radio-group v-model="gender">
+                <el-radio value="1" size="larger">Male</el-radio>
+                <el-radio value="2" size="larger">Female</el-radio>
+              </el-radio-group>
+            </div>
+          </div>
         </el-main>
       </el-container>
     </el-container>
@@ -115,8 +164,6 @@
 
 <script>
 import HelloWorld from '@/components/HelloWorld.vue';
-// 组件引用
-
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import { ArrowRight } from '@element-plus/icons-vue';
