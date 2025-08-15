@@ -105,9 +105,10 @@
           </el-dropdown>
         </el-header>
 
-        <el-main>
-          <router-view></router-view>
-        </el-main>
+        <container>
+          <el-main>
+            <router-view></router-view> </el-main
+        ></container>
       </el-container>
     </el-container>
   </div>
