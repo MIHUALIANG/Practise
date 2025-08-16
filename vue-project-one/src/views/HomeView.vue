@@ -28,7 +28,7 @@
               <el-menu-item index="/information">Information</el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="Group Two">
-              <el-menu-item index="1-3">item three</el-menu-item>
+              <el-menu-item index="/table">item three</el-menu-item>
             </el-menu-item-group>
             <el-sub-menu index="1-4">
               <template #title>item four</template>
@@ -106,8 +106,7 @@
         </el-header>
 
         <container>
-          <el-main>
-            <router-view></router-view> </el-main
+          <el-main> <router-view></router-view> </el-main
         ></container>
       </el-container>
     </el-container>
