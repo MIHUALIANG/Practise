@@ -28,7 +28,7 @@
               <el-menu-item index="/information">Information</el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="Group Two">
-              <el-menu-item index="/table">item three</el-menu-item>
+              <el-menu-item index="/table">Table</el-menu-item>
             </el-menu-item-group>
             <el-sub-menu index="1-4">
               <template #title>item four</template>
@@ -131,7 +131,7 @@ export default {
   setup() {
     const router = useRouter();
     const isCollapse = ref(false); // 是否折叠
-    const activeIndex = ref(''); // 当前激活菜单项
+    const activeIndex = ref('/about'); // 当前激活菜单项
     const datevalue = ref('');
     const gender = ref('1');
     const inputname = ref('');
