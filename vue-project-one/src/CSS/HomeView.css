@@ -104,15 +104,31 @@
   transition: transform 0.3s;
 }
 
-.el-button {
+.el-header .el-button {
   float: left;
   margin-left: 20px;
 }
 
 .el-breadcrumb {
   line-height: 40px;
-  margin-left: 40px;
+  margin-left: 10px;
   float: left;
+}
+
+.el-main .nav {
+  background-color: #fff;
+  height: 40px;
+  width: 100%;
+}
+.nav > span {
+  display: block;
+  float: left;
+  margin: 10px 0px 10px 10px;
+}
+
+.nav-icon {
+  float: left;
+  margin: 10px 10px 10px 30px;
 }
 
 .el-container .el-header {
@@ -139,22 +155,19 @@
   margin-top: 0;
 }
 
-.el-main {
+.el-main .home {
   margin: 20px;
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.el-main > div {
+.el-main,
+.home > div {
   padding: 0;
   background-color: transparent;
   box-shadow: none;
-}
-
-.mainstyle {
-  margin: 10px 0px;
 }
 
 .el-main .title {
@@ -170,6 +183,7 @@
 .button-submit {
   margin: 0px 0px 0px 500px;
 }
+
 /* 输入框对齐样式 */
 .mainstyle {
   margin: 10px 0px;
@@ -200,3 +214,41 @@
 .cell {
   text-align: center;
 }
+
+.button-clear .el-button {
+  margin: 10px auto;
+}
+
+/* 有关service的设置 */
+
+.service {
+  height: 2000px;
+}
+
+.el-card {
+  float: left;
+  margin: 10px;
+  position: relative;
+}
+
+.card-1 {
+  width: 500px;
+}
+
+.card-2 {
+  width: 300px;
+}
+
+.card-3 {
+  width: 200px;
+  height: 600px;
+}
+
+.card-4 {
+  width: 200px;
+  position: absolute;
+  top: 520px;
+  left: 820px;
+}
+
+/* 有关图表 */

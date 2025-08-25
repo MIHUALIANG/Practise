@@ -1,4 +1,17 @@
 <template>
+  <div class="nav">
+    <el-icon class="nav-icon"><Tickets /></el-icon>
+    <span>//</span>
+
+    <el-breadcrumb :separator-icon="ArrowRight">
+      <el-breadcrumb-item :to="{ path: '/' }"> homepage </el-breadcrumb-item>
+      <el-breadcrumb-item :to="{ path: '/' }"
+        >promotion management</el-breadcrumb-item
+      >
+      <el-breadcrumb-item>promotion list</el-breadcrumb-item>
+      <el-breadcrumb-item>promotion detail</el-breadcrumb-item>
+    </el-breadcrumb>
+  </div>
   <div class="home">
     <el-container class="container">
       <div class="el-mains">
