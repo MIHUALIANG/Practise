@@ -9,11 +9,11 @@ const routes = [
     component: HomeView,
     children: [
       {
-        path: 'information',
+        path: '/information',
         component: Information
       },
       {
-        path: 'table',
+        path: '/table',
         component: () => import('../views/Table.vue')
       },
       {

@@ -21,7 +21,7 @@
           <el-sub-menu index="1">
             <template #title>
               <el-icon><location /></el-icon>
-              <span>Navigator One</span>
+              <span>Navigator</span>
             </template>
             <el-menu-item-group title="Our Information">
               <el-menu-item index="/about">About us</el-menu-item>
@@ -107,8 +107,8 @@
 import HelloWorld from '@/components/HelloWorld.vue';
 // 组件引用
 
-import { useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { ref, watch } from 'vue';
 import { ArrowRight } from '@element-plus/icons-vue';
 import avatarImg from '../assets/zz.jpg';
 
@@ -120,6 +120,7 @@ export default {
 
   setup() {
     const router = useRouter();
+    const route = useRoute(); // ✅ 正确获取当前路由
     const isCollapse = ref(false); // 是否折叠
     const activeIndex = ref('/about'); // 当前激活菜单项
     const datevalue = ref('');
@@ -157,8 +158,18 @@ export default {
 
     const handleSelect = (index) => {
       router.push(index);
+      // 跳转路由
       activeIndex.value = index;
+      // 改变 acticeIndex
     };
+
+    watch(
+      () => route.path, // 监听 route.path
+      (newPath) => {
+        activeIndex.value = newPath; // 同步左侧菜单高亮
+      },
+      { immediate: true } // 初始化时也同步
+    );
 
     const handleOpen = (key, keyPath) => {
       console.log('open:', key, keyPath);

@@ -4,12 +4,11 @@
     <span>//</span>
 
     <el-breadcrumb :separator-icon="ArrowRight">
-      <el-breadcrumb-item :to="{ path: '/' }"> homepage </el-breadcrumb-item>
-      <el-breadcrumb-item :to="{ path: '/' }"
-        >promotion management</el-breadcrumb-item
-      >
-      <el-breadcrumb-item>promotion list</el-breadcrumb-item>
-      <el-breadcrumb-item>promotion detail</el-breadcrumb-item>
+      <el-breadcrumb-item :to="{ path: '/about' }">
+        Navigator
+      </el-breadcrumb-item>
+      <el-breadcrumb-item>About You</el-breadcrumb-item>
+      <el-breadcrumb-item>Information</el-breadcrumb-item>
     </el-breadcrumb>
   </div>
   <div class="home">
@@ -24,6 +23,14 @@
           />
         </div>
         <div class="mainstyle">
+          <span class="title">Tel: </span>
+          <el-input
+            v-model="inputtel"
+            style="width: 240px"
+            placeholder="Please input your tel number"
+          />
+        </div>
+        <div class="mainstyle">
           <span class="title">Age: </span>
           <el-input
             v-model="inputage"
@@ -33,7 +40,11 @@
         </div>
         <div class="mainstyle">
           <span class="title">School: </span>
-          <el-select v-model="value" placeholder="Select" style="width: 240px">
+          <el-select
+            v-model="schoolvalue"
+            placeholder="Select"
+            style="width: 240px"
+          >
             <el-option
               v-for="item in options"
               :key="item.value"
@@ -81,6 +92,7 @@ import { useStore } from 'vuex';
 import { ElMessage } from 'element-plus';
 import { ArrowRight } from '@element-plus/icons-vue';
 import avatarImg from '../assets/zz.jpg';
+import axios from 'axios'; // ✅ 引入 axios
 
 export default {
   name: 'HomeView',
@@ -97,7 +109,8 @@ export default {
     const gender = ref('1');
     const inputname = ref('');
     const inputage = ref('');
-    const value = ref('');
+    const inputtel = ref('');
+    const schoolvalue = ref('');
 
     const options = [
       {
@@ -162,8 +175,8 @@ export default {
     ];
 
     const submitForm = () => {
-      // 验证必填字段
-      if (!inputname.value || !inputage.value || !value.value) {
+      // 验证必填字段 例如!inputname.value || !inputage.value || !schoolvalue.value代表这几项必填
+      if (!schoolvalue.value) {
         ElMessage.warning('Please fill in all required fields');
         return;
       }
@@ -182,22 +195,34 @@ export default {
       const newData = {
         name: inputname.value,
         age: inputage.value,
-        school: value.value,
+        school: schoolvalue.value,
         birthday: formattedDate,
         gender: gender.value === '1' ? 'Male' : 'Female',
-        date: formattedDate || new Date().toISOString().split('T')[0] // 如果没有选择日期，使用当前日期
+        date: formattedDate || new Date().toISOString().split('T')[0], // 如果没有选择日期，使用当前日期
+        tel: inputtel.value
       };
 
       // 添加到Vuex store
       store.dispatch('addTableData', newData);
 
+      //第二步：把数据发送到后端
+      axios
+        .post('http://localhost:3000/save', newData)
+        .then(() => {
+          // ElMessage.success('Data saved to backend successfully!');
+        })
+        .catch(() => {
+          ElMessage.error('Failed to save data to backend');
+        });
+
       // 显示成功消息
-      ElMessage.success('Data has been added to table successfully!');
+      // ElMessage.success('Data has been added to table successfully!');
 
       // 可选：清空表单
       inputname.value = '';
       inputage.value = '';
-      value.value = '';
+      inputtel.value = '';
+      schoolvalue.value = '';
       datevalue.value = '';
     };
 
@@ -215,7 +240,8 @@ export default {
       gender,
       inputname,
       inputage,
-      value,
+      inputtel,
+      schoolvalue,
       options,
       submitForm
     };

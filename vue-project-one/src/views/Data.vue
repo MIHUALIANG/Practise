@@ -1,95 +1,117 @@
 <template>
   <div class="chart-container">
-    <!-- 图表容器，ref 绑定，后续通过 chartRef 获取这个 DOM -->
+    <!-- 图表容器，ref 绑定 -->
     <div ref="chartRef" class="chart"></div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'; // 引入 Composition API
-import * as echarts from 'echarts'; // 引入 ECharts 库
+import { ref, onMounted } from 'vue';
+import * as echarts from 'echarts';
+import axios from 'axios'; // 如果需要后端数据
 
 export default {
   name: 'DataChart',
   setup() {
-    const chartRef = ref(null); // 用于绑定图表容器 DOM
-    let myChart = null; // 保存 echarts 实例
+    const chartRef = ref(null);
+    let myChart = null;
+
+    // ===== 原始前端示例数据（可保留注释，方便切换） =====
+    const localTableData = [
+      { name: 'Alice', school: 'School A' },
+      { name: 'Bob', school: 'School C' },
+      { name: 'Charlie', school: 'School C' },
+      { name: 'David', school: 'School D' },
+      { name: 'Eve', school: 'School E' }
+    ];
+
+    // ===== 原始前端示例数据（直接给出数值，不计算数量） =====
+    // 这里的 value 即为每个学校占比的权重
+    // const localTableData = [
+    //   { name: 'School A', value: 120 },
+    //   { name: 'School B', value: 80 },
+    //   { name: 'School C', value: 150 },
+    //   { name: 'School D', value: 50 },
+    //   { name: 'School E', value: 100 }
+    // ];
+
+    // ===== 后端数据（可切换使用） =====
+    const backendTableData = ref([]);
+
+    // ===== 工具函数：统计学校人数 =====
+    const getSchoolCounts = (tableData) => {
+      const map = {};
+      tableData.forEach((item) => {
+        if (item.school) map[item.school] = (map[item.school] || 0) + 1;
+      });
+      return Object.entries(map).map(([name, value]) => ({ name, value }));
+    };
+
+    // ===== 获取后端数据并更新图表 =====
+    const fetchBackendData = async () => {
+      try {
+        const res = await axios.get('http://localhost:3000/list');
+        backendTableData.value = res.data;
+
+        myChart.setOption({
+          series: [{ data: getSchoolCounts(backendTableData.value) }]
+        });
+      } catch (err) {
+        console.error('Failed to fetch backend data', err);
+      }
+    };
 
     onMounted(() => {
-      // 初始化 echarts 实例，挂载到 ref 对应的 DOM
       myChart = echarts.init(chartRef.value);
 
-      // 图表配置项
       const option = {
-        tooltip: {
-          trigger: 'item' // 提示框触发类型（'item' 鼠标悬浮时显示数据）
-        },
-        legend: {
-          top: '5%', // 图例距离容器顶部 5%
-          left: 'center' // 图例水平居中
-        },
+        tooltip: { trigger: 'item' },
+        legend: { top: '5%', left: 'center' },
         series: [
           {
-            name: 'Access From', // 系列名称
-            type: 'pie', // 图表类型：饼图
-            radius: ['40%', '70%'], // 饼图半径（内半径40%，外半径70% → 圆环图）
-            avoidLabelOverlap: false, // 避免标签重叠
-            padAngle: 5, // 每个扇区之间的间隙角度
-            itemStyle: {
-              borderRadius: 10 // 扇区圆角大小
-            },
-            label: {
-              show: false, // 默认隐藏标签
-              position: 'center' // 标签显示在圆心（只有在 emphasis 下才显示）
-            },
+            name: 'Count',
+            type: 'pie',
+            radius: ['40%', '70%'], // 保留原始圆环效果
+            avoidLabelOverlap: false,
+            padAngle: 5, // 保留扇区间距
+            itemStyle: { borderRadius: 10 },
+            label: { show: false, position: 'center' },
             emphasis: {
-              // 高亮状态（鼠标悬停时）
-              label: {
-                show: true, // 高亮时显示标签
-                fontSize: 20, // 字体大小
-                fontWeight: 'bold' // 字体加粗
-              }
+              label: { show: true, fontSize: 20, fontWeight: 'bold' }
             },
-            labelLine: {
-              show: false // 隐藏标签的引导线
-            },
-            // 图表数据
-            data: [
-              { value: 1048, name: 'Search Engine' }, // 搜索引擎
-              { value: 735, name: 'Direct' }, // 直接访问
-              { value: 580, name: 'Email' }, // 邮件
-              { value: 484, name: 'Union Ads' }, // 联合广告
-              { value: 300, name: 'Video Ads' } // 视频广告
-            ]
+            labelLine: { show: false },
+            // ===== 默认显示前端数据统计后结果展示 =====
+            data: getSchoolCounts(localTableData)
+
+            // 直接使用数据展示 无需统计数量
+            // data: localTableData
           }
         ]
       };
 
-      // 将配置项应用到图表实例
       myChart.setOption(option);
-
-      // 监听窗口大小变化，自动调整图表尺寸
       window.addEventListener('resize', () => {
         myChart.resize();
       });
+
+      // ===== 如果希望使用前端数据，注释下面一行  数据源就会被修改 返回给前端数据=====
+      // 默认使用的是前端数据 但是下面一行把数据源覆盖了 使用了后端数据
+      fetchBackendData();
     });
 
-    // 将 chartRef 暴露给模板使用
     return { chartRef };
   }
 };
 </script>
 
 <style scoped>
-/* 外层容器 */
+/* 保留原始样式设置 */
 .chart-container {
-  width: 100%; /* 宽度自适应父容器 */
-  height: 600px; /* 高度固定 400px，可以根据需要修改 */
+  width: 100%;
+  height: 600px; /* 可根据需要修改 */
 }
-
-/* 图表实际绘制区域 */
 .chart {
-  width: 100%; /* 撑满容器 */
-  height: 100%; /* 撑满容器 */
+  width: 100%;
+  height: 100%;
 }
 </style>
