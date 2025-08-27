@@ -1,0 +1,37 @@
+<template>
+  <div class="home">
+    <el-container class="container">
+      <!-- 左侧 Sidebar -->
+      <el-aside
+        :width="sidebarRef?.isCollapse ? '64px' : '200px'"
+        class="aside"
+      >
+        <Sidebar ref="sidebarRef" />
+      </el-aside>
+
+      <!-- 右侧部分 -->
+      <el-container>
+        <!-- 顶部 Header -->
+        <el-header>
+          <HeaderBar @toggleCollapse="toggleSidebar" />
+        </el-header>
+
+        <el-main>
+          <router-view></router-view>
+        </el-main>
+      </el-container>
+    </el-container>
+  </div>
+</template>
+
+<script setup>
+import Sidebar from './Sidebar.vue';
+import HeaderBar from './HeaderBar.vue';
+import { ref } from 'vue';
+
+const sidebarRef = ref(null);
+
+const toggleSidebar = () => {
+  sidebarRef.value.toggleCollapse();
+};
+</script>
