@@ -22,6 +22,7 @@
       max-height="400"
     >
       <el-table-column prop="date" label="Date" width="120" />
+      <el-table-column prop="week" label="Week" width="120" />
       <el-table-column prop="name" label="Name" width="120" />
       <el-table-column prop="age" label="Age" width="120" />
       <el-table-column prop="tel" label="Tel" width="120" />
@@ -34,6 +35,7 @@
     <!--
     <el-table :data="frontendTableData" stripe style="width: 100%" max-height="500">
       <el-table-column prop="date" label="Date" width="120" />
+      <el-table-column prop="week" label="Week" width="120" />
       <el-table-column prop="name" label="Name" width="120" />
       <el-table-column prop="age" label="Age" width="120" />
       <el-table-column prop="tel" label="Tel" width="120" />

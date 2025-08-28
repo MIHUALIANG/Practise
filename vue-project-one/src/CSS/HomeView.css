@@ -194,8 +194,15 @@
 .mainstyle .el-input,
 .mainstyle .el-select,
 .mainstyle .el-date-picker,
+.mainstyle .el-segmented,
 .mainstyle .el-radio-group {
   margin-left: 10px;
+}
+
+.el-segmented {
+  --el-segmented-item-selected-color: var(--el-text-color-primary);
+  --el-segmented-item-selected-bg-color: #38a599;
+  --el-border-radius-base: 16px;
 }
 
 .el-table__header-wrapper .el-table__header {

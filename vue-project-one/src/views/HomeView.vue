@@ -44,7 +44,7 @@
             <el-icon><document /></el-icon>
             <span>Privacy Data</span>
           </el-menu-item>
-          <el-menu-item index="4">
+          <el-menu-item index="/setting">
             <el-icon><setting /></el-icon>
             <span>Setting</span>
           </el-menu-item>
@@ -96,8 +96,8 @@
         </el-header>
 
         <container>
-          <el-main> <router-view></router-view> </el-main
-        ></container>
+          <el-main> <router-view></router-view> </el-main>
+        </container>
       </el-container>
     </el-container>
   </div>
@@ -123,34 +123,6 @@ export default {
     const route = useRoute(); // ✅ 正确获取当前路由
     const isCollapse = ref(false); // 是否折叠
     const activeIndex = ref('/about'); // 当前激活菜单项
-    const datevalue = ref('');
-    const gender = ref('1');
-    const inputname = ref('');
-    const inputage = ref('');
-    const value = ref('');
-
-    const options = [
-      {
-        value: 'NJUPT',
-        label: 'NJUPT'
-      },
-      {
-        value: 'THU',
-        label: 'THU'
-      },
-      {
-        value: 'NKU',
-        label: 'NKU'
-      },
-      {
-        value: 'NJU',
-        label: 'NJU'
-      },
-      {
-        value: 'BIT',
-        label: 'BIT'
-      }
-    ];
 
     const toggleCollapse = () => {
       isCollapse.value = !isCollapse.value;
@@ -171,35 +143,13 @@ export default {
       { immediate: true } // 初始化时也同步
     );
 
+    // 仅用于调试菜单展开/关闭
     const handleOpen = (key, keyPath) => {
       console.log('open:', key, keyPath);
     };
     const handleClose = (key, keyPath) => {
       console.log('close:', key, keyPath);
     };
-
-    const shortcuts = [
-      {
-        text: 'Today',
-        value: new Date()
-      },
-      {
-        text: 'Yesterday',
-        value: () => {
-          const date = new Date();
-          date.setDate(date.getDate() - 1);
-          return date;
-        }
-      },
-      {
-        text: 'A week ago',
-        value: () => {
-          const date = new Date();
-          date.setDate(date.getDate() - 7);
-          return date;
-        }
-      }
-    ];
 
     return {
       handleClose,
@@ -209,14 +159,7 @@ export default {
       isCollapse,
       activeIndex,
       ArrowRight,
-      avatarImg,
-      shortcuts,
-      datevalue,
-      gender,
-      inputname,
-      inputage,
-      value,
-      options
+      avatarImg
     };
   }
 };

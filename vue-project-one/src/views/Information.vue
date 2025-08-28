@@ -15,6 +15,14 @@
     <el-container class="container">
       <div class="el-mains">
         <div class="mainstyle">
+          <span class="title">Week:</span>
+          <el-segmented
+            v-model="weekvalue"
+            :options="weekoptions"
+            size="default"
+          />
+        </div>
+        <div class="mainstyle">
           <span class="title">Name: </span>
           <el-input
             v-model="inputname"
@@ -46,7 +54,7 @@
             style="width: 240px"
           >
             <el-option
-              v-for="item in options"
+              v-for="item in schooloptions"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -86,12 +94,10 @@
 
 <script>
 import HelloWorld from '@/components/HelloWorld.vue';
-import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import { useStore } from 'vuex';
 import { ElMessage } from 'element-plus';
 import { ArrowRight } from '@element-plus/icons-vue';
-import avatarImg from '../assets/zz.jpg';
 import axios from 'axios'; // ✅ 引入 axios
 
 export default {
@@ -101,18 +107,18 @@ export default {
   },
 
   setup() {
-    const router = useRouter();
     const store = useStore();
-    const isCollapse = ref(false); // 是否折叠
-    const activeIndex = ref(''); // 当前激活菜单项
     const datevalue = ref('');
     const gender = ref('1');
     const inputname = ref('');
     const inputage = ref('');
     const inputtel = ref('');
     const schoolvalue = ref('');
+    const weekvalue = ref('Mon');
 
-    const options = [
+    const weekoptions = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    const schooloptions = [
       {
         value: 'NJUPT',
         label: 'NJUPT'
@@ -134,22 +140,6 @@ export default {
         label: 'BIT'
       }
     ];
-
-    const toggleCollapse = () => {
-      isCollapse.value = !isCollapse.value;
-    };
-
-    const handleSelect = (index) => {
-      router.push(index);
-      activeIndex.value = index;
-    };
-
-    const handleOpen = (key, keyPath) => {
-      console.log('open:', key, keyPath);
-    };
-    const handleClose = (key, keyPath) => {
-      console.log('close:', key, keyPath);
-    };
 
     const shortcuts = [
       {
@@ -196,6 +186,7 @@ export default {
         name: inputname.value,
         age: inputage.value,
         school: schoolvalue.value,
+        week: weekvalue.value,
         birthday: formattedDate,
         gender: gender.value === '1' ? 'Male' : 'Female',
         date: formattedDate || new Date().toISOString().split('T')[0], // 如果没有选择日期，使用当前日期
@@ -224,17 +215,12 @@ export default {
       inputtel.value = '';
       schoolvalue.value = '';
       datevalue.value = '';
+      weekvalue.value = '';
+      inputname.value = '';
     };
 
     return {
-      handleClose,
-      handleOpen,
-      handleSelect,
-      toggleCollapse,
-      isCollapse,
-      activeIndex,
       ArrowRight,
-      avatarImg,
       shortcuts,
       datevalue,
       gender,
@@ -242,8 +228,10 @@ export default {
       inputage,
       inputtel,
       schoolvalue,
-      options,
-      submitForm
+      schooloptions,
+      submitForm,
+      weekvalue,
+      weekoptions
     };
   }
 };
