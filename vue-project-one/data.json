@@ -179,5 +179,15 @@
     "gender": "Male",
     "date": "2025-08-28",
     "tel": ""
+  },
+  {
+    "name": "张志",
+    "age": "18",
+    "school": "NJUPT",
+    "week": "Wed",
+    "birthday": "2025-09-17",
+    "gender": "Male",
+    "date": "2025-09-17",
+    "tel": "19509993268"
   }
 ]
