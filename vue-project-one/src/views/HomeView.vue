@@ -62,7 +62,7 @@
           >
           </el-button>
 
-          <el-dropdown trigger="click">
+          <el-dropdown trigger="click" @command="handleCommand">
             <span class="el-dropdown-link">
               Dropdown List
               <el-icon class="el-icon--right"><arrow-down /> </el-icon>
@@ -71,23 +71,23 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>
+                <el-dropdown-item command="A">
                   <el-icon><Plus /></el-icon>Action 1
                 </el-dropdown-item>
 
-                <el-dropdown-item>
+                <el-dropdown-item command="B">
                   <el-icon><CirclePlusFilled /></el-icon>Action 2
                 </el-dropdown-item>
 
-                <el-dropdown-item>
+                <el-dropdown-item command="C">
                   <el-icon><CirclePlus /></el-icon>Action 3
                 </el-dropdown-item>
 
-                <el-dropdown-item>
+                <el-dropdown-item command="D">
                   <el-icon><Check /></el-icon>Action 4
                 </el-dropdown-item>
 
-                <el-dropdown-item>
+                <el-dropdown-item command="E">
                   <el-icon><CircleCheck /></el-icon>Action 5
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -111,6 +111,8 @@ import { useRouter, useRoute } from 'vue-router';
 import { ref, watch } from 'vue';
 import { ArrowRight } from '@element-plus/icons-vue';
 import avatarImg from '../assets/zz.jpg';
+// import { ElMessage } from 'element-plus';
+import { ElNotification } from 'element-plus';
 
 export default {
   name: 'HomeView',
@@ -124,6 +126,9 @@ export default {
     const isCollapse = ref(false); // 是否折叠
     const activeIndex = ref('/about'); // 当前激活菜单项
 
+    const handleCommand = (command) => {
+      ElNotification(`Click On Item ${command}`);
+    };
     const toggleCollapse = () => {
       isCollapse.value = !isCollapse.value;
     };
@@ -155,6 +160,7 @@ export default {
       handleClose,
       handleOpen,
       handleSelect,
+      handleCommand,
       toggleCollapse,
       isCollapse,
       activeIndex,
