@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<!-- HTML5文档声明，确保浏览器使用最新的HTML标准 -->
+<html lang="en-US" data-lg-smooth>
+<!-- 
+  lang="en-US": 设置页面语言为美式英语，有助于屏幕阅读器和搜索引擎理解内容
+  data-lg-smooth: 自定义属性，用于启用平滑滚动效果（可能与Luge库相关）
+-->
+
+<head>
+  <!-- 文档头部，包含元数据、样式表和脚本引用 -->
+  
+  <meta charset="UTF-8" />
+  <!-- 字符编码设置为UTF-8，支持所有国际字符和表情符号 -->
+  
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <!-- 强制IE浏览器使用最新的渲染引擎，确保兼容性 -->
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 响应式设计的关键设置：
+       width=device-width: 视口宽度等于设备屏幕宽度
+       initial-scale=1: 初始缩放比例为1，确保移动端正确显示 -->
+  
+  <title>Education</title>
+  <!-- 页面标题，显示在浏览器标签页上，也用于书签和搜索引擎 -->
+
+  <!-- ===== 样式表引用部分 ===== -->
+  <!-- 采用模块化CSS架构，按功能分离样式文件 -->
+  
+  <!-- 自定义字体文件 -->
+  <link
+    rel="stylesheet"
+    href="https://247artists.com/wp-content/themes/creatorspc/static/fonts/gellix.css?ver=1.0.0"
+  />
+  <!-- ver=1.0.0: 版本号用于缓存控制，字体更新时强制重新加载 -->
+  
+  <!-- 主要样式文件，包含基础样式、重置样式和通用组件样式 -->
+  <link
+    rel="stylesheet"
+    href="https://247artists.com/wp-content/themes/creatorspc/build/css/main.css?ver=179924284"
+  />
+  
+  <!-- 教育首页组件专用样式 -->
+  <link
+    rel="stylesheet"
+    href="https://247artists.com/wp-content/themes/creatorspc/build/css/components/s-education-home.css?ver=179924284"
+  />
+  <!-- s-education-home: 组件命名约定，s-表示section（区块），education-home表示教育首页 -->
+  
+  <!-- 首页布局样式 -->
+  <link
+    rel="stylesheet"
+    href="https://247artists.com/wp-content/themes/creatorspc/build/css/layouts/front-page.css?ver=179924284"
+  />
+  
+  <!-- 水平线条装饰样式 -->
+  <link
+    rel="stylesheet"
+    href="https://247artists.com/wp-content/themes/creatorspc/build/css/components/a-lines-horizontal.css?ver=179924284"
+  />
+  <!-- a-lines-horizontal: a-表示atom（原子），lines-horizontal表示水平线条装饰 -->
+  
+  <!-- 功能特性首页组件样式 -->
+  <link
+    rel="stylesheet"
+    href="https://247artists.com/wp-content/themes/creatorspc/build/css/components/s-features-home.css?ver=179924284"
+  />
+</head>
+
+<body class="home wp-singular page-template-default page wp-theme-creatorspc">
+<!-- 
+  多个CSS类用于样式控制和主题识别：
+  home: 标识为首页
+  wp-singular: WordPress单页面标识
+  page-template-default: 默认页面模板
+  page: 页面类型标识
+  wp-theme-creatorspc: 主题名称标识
+-->
+
+<!-- ===== 主容器结构 ===== -->
+<div class="site-container">
+  <!-- 网站主容器，提供最大宽度限制和居中布局 -->
+  
+  <main class="l-front-page" data-plr-layout="front-page" data-lg-page>
+  <!-- 
+    main: 语义化HTML5标签，表示主要内容区域
+    l-front-page: layout-front-page的缩写，首页布局样式
+    data-plr-layout: 自定义属性，用于JavaScript识别布局类型
+    data-lg-page: 可能与Luge库相关的页面标识
+  -->
+    
+    <!-- ===== 教育首页组件 ===== -->
+    <div
+      class="s-education-home"
+      data-plr-component="s-education-home"
+      id="education"
+    >
+    <!-- 
+      s-education-home: 教育首页组件样式类
+      data-plr-component: 组件标识，用于JavaScript自动加载组件脚本
+      id="education": 页面锚点，用于导航和滚动定位
+    -->
+      
+      <div class="s__inner">
+        <!-- 组件内部容器，提供统一的内部布局和样式 -->
+        
+        <div class="u-container">
+          <!-- u-container: utility-container的缩写，通用容器类，通常用于限制内容最大宽度 -->
+          
+          <div class="s__content js-content">
+            <!-- 
+              s__content: 组件内容区域
+              js-content: JavaScript钩子类，用于脚本交互和动画
+            -->
+            
+            <!-- 副标题：Education -->
+            <h2 class="s__suptitle t-suptitle">Education</h2>
+            <!-- 
+              s__suptitle: 组件副标题样式
+              t-suptitle: typography-suptitle的缩写，副标题字体样式
+            -->
+            
+            <!-- 主标题：We help artists grow -->
+            <p class="s__title t-title">We help artists grow</p>
+            <!-- 
+              s__title: 组件主标题样式
+              t-title: typography-title的缩写，主标题字体样式
+            -->
+            
+            <!-- 描述文本，包含课程链接 -->
+            <p class="s__text rte">
+              <!-- 
+                s__text: 组件文本样式
+                rte: rich-text-editor的缩写，富文本编辑器样式，支持链接等格式化
+              -->
+              Access expert-led
+              <a href="https://learn.247artists.com/">online courses</a>,
+              live webinars, and mentorship programs designed to sharpen
+              your skills and expand your career opportunities.
+            </p>
+            
+            <!-- 背景装饰元素 -->
+            <div class="s__background"></div>
+            <!-- 用于背景装饰、渐变或图案的容器 -->
+          </div>
+        </div>
+        
+        <!-- ===== 课程列表区域 ===== -->
+        <div class="s__courses">
+          <!-- 课程列表容器 -->
+          
+          <!-- 课程数量标题 -->
+          <h3 class="sb-course sb-course--title js-course">
+            <!-- 
+              sb-course: section-block-course的缩写，课程块样式
+              sb-course--title: BEM命名法的修饰符，表示标题样式
+              js-course: JavaScript钩子，用于课程项的交互
+            -->
+            <span class="sb__inner"> 20+ Courses </span>
+            <!-- sb__inner: 课程块内部容器 -->
+          </h3>
+          
+          <!-- 课程列表 -->
+          <ul class="s__courses__list">
+            <!-- 无序列表，包含所有课程项 -->
+            
+            <!-- 课程项目1：独立音乐一年计划 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner">
+                Creating a One Year Indie Music Plan
+              </span>
+            </li>
+            
+            <!-- 课程项目2：建立不可阻挡的品牌身份 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner">
+                Building an Unstoppable Brand Identity
+              </span>
+            </li>
+            
+            <!-- 课程项目3：愿景板艺术 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> The art of Vision Boarding </span>
+            </li>
+            
+            <!-- 课程项目4：艺术家巡演5个技巧 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner">
+                5 Tips for Artists Going On Tour
+              </span>
+            </li>
+            
+            <!-- 课程项目5：音乐商业入门 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Music Business Intro </span>
+            </li>
+            
+            <!-- 课程项目6：巡演中的自我管理 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner">
+                How to Manage Yourself as an Artist on the Road
+              </span>
+            </li>
+            
+            <!-- 课程项目7：艺术家营销 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Marketing for Artists </span>
+            </li>
+            
+            <!-- 课程项目8：建立团队 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Building a team </span>
+            </li>
+            
+            <!-- 课程项目9：艺术家职业道路 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Artist Career Path </span>
+            </li>
+            
+            <!-- 课程项目10：音乐出版101 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Music Publishing 101 </span>
+            </li>
+            
+            <!-- 课程项目11：商业计划写作 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner">
+                Writing your Business Plan (Business model canvas)
+              </span>
+            </li>
+            
+            <!-- 课程项目12：音乐发行策略 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Music Releasing Strategies </span>
+            </li>
+            
+            <!-- 课程项目13：音乐营销和推广 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Music Marketing and Promotion </span>
+            </li>
+            
+            <!-- 课程项目14：巡演管理和预订 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Tour Management and Booking </span>
+            </li>
+            
+            <!-- 课程项目15：艺术家发展策略 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Artist Development Strategies </span>
+            </li>
+            
+            <!-- 课程项目16：版权和知识产权 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner">
+                Copyright and Intellectual Property
+              </span>
+            </li>
+            
+            <!-- 课程项目17：创办独立唱片公司 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner">
+                Starting an indie record label
+              </span>
+            </li>
+            
+            <!-- 课程项目18：协议和合同101 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Agreements and Contracts 101 </span>
+            </li>
+            
+            <!-- 课程项目19：艺术家管理入门 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Intro to Artist Management </span>
+            </li>
+            
+            <!-- 课程项目20：建立你的业务 -->
+            <li class="sb-course js-course">
+              <span class="sb__inner"> Setting up YOUR business </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- 教育首页组件结束 -->
+  </main>
+</div>
+
+<!-- ===== 功能特性首页组件 ===== -->
+<!-- 用于展示平台的技术特性和功能亮点 -->
+<div
+  class="s-features-home"
+  data-plr-component="s-features-home"
+  id="technology"
+>
+<!-- 
+  s-features-home: 功能特性首页组件
+  data-plr-component: 组件标识，用于自动加载JavaScript
+  id="technology": 页面锚点，用于导航定位
+-->
+
+  <div class="s__inner">
+    <!-- 组件内部容器，提供统一的布局和样式 -->
+    
+    <!-- ===== 主要内容区域 ===== -->
+    <div class="s__content js-content">
+      <!-- 
+        s__content: 组件内容区域
+        js-content: JavaScript钩子，用于滚动动画和交互
+      -->
+      
+      <!-- 副标题：Technology -->
+      <h2 class="s__suptitle t-suptitle js-suptitle">Technology</h2>
+      <!-- js-suptitle: JavaScript钩子，用于动画控制 -->
+      
+      <!-- 主标题：We simplify the business -->
+      <p class="s__title t-title js-title">
+        We simplify<br />
+        the business
+      </p>
+      <!-- js-title: JavaScript钩子，用于动画控制 -->
+    </div>
+    
+    <!-- ===== 功能特性列表容器 ===== -->
+    <div class="s__features js-features">
+      <!-- 
+        s__features: 功能特性容器
+        js-features: JavaScript钩子，用于整体动画控制
+      -->
+      
+      <!-- ===== 功能特性1：所有权分配 ===== -->
+      <div class="sb-feature js-feature">
+        <!-- 
+          sb-feature: section-block-feature的缩写，功能特性块
+          js-feature: JavaScript钩子，用于单个功能的动画控制
+        -->
+        
+        <div class="sb__inner">
+          <!-- 功能特性内部容器 -->
+          
+          <!-- ===== 计数器组件 ===== -->
+          <div class="sb__counter">
+            <!-- 显示当前功能序号和总数量 -->
+            
+            <!-- 当前序号：01 -->
+            <div class="sb__counter__number sb__counter__number--index">
+              01
+            </div>
+            <!-- 
+              sb__counter__number: 计数器数字样式
+              sb__counter__number--index: BEM修饰符，表示当前序号
+            -->
+            
+            <!-- 总数量：05 -->
+            <div class="sb__counter__number sb__counter__number--total">
+              05
+            </div>
+            <!-- sb__counter__number--total: BEM修饰符，表示总数量 -->
+          </div>
+          <!-- .sb__counter -->
+          
+          <!-- ===== 图标区域 ===== -->
+          <div class="sb__icon">
+            <!-- 功能图标容器 -->
+            
+            <!-- 所有权分配图标 - 圆形分割图标 -->
+            <span class="a-svg a-svg--ownership">
+              <!-- 
+                a-svg: atom-svg的缩写，SVG图标原子组件
+                a-svg--ownership: BEM修饰符，表示所有权图标
+              -->
+              <svg
+                width="71"
+                height="71"
+                viewBox="0 0 71 71"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <!-- 
+                  SVG图标设计原理：
+                  - viewBox="0 0 71 71": 定义SVG的坐标系统
+                  - fill="none": 默认无填充
+                  - 使用path元素绘制圆形分割图案
+                  - 每个path代表圆形的一个扇形区域
+                -->
+                
+                <!-- 圆形分割路径1：上半部分扇形 -->
+                <path
+                  d="M62.3323 38.2422L8.66016 38.2422C9.08583 42.1032 10.3256 45.7189 12.204 48.9141L58.7884 48.9141C60.6669 45.7189 61.9066 42.1032 62.3323 38.2422Z"
+                  fill="#2A2925"
+                />
+                <!-- 
+                  SVG路径原理：
+                  - M: MoveTo命令，移动到起始点
+                  - L: LineTo命令，绘制直线
+                  - C: CurveTo命令，绘制贝塞尔曲线
+                  - Z: 闭合路径
+                  - fill="#2A2925": 填充深灰色
+                -->
+                
+                <!-- 圆形分割路径2：右下部分扇形 -->
+                <path
+                  d="M53.9984 54.9141L16.9941 54.9141C21.8266 59.4628 28.3359 62.25 35.4962 62.25C42.6565 62.25 49.1658 59.4628 53.9984 54.9141Z"
+                  fill="#2A2925"
+                />
+                
+                <!-- 圆形分割路径3：下半部分扇形 -->
+                <path
+                  d="M62.3306 32.2422L8.66188 32.2422C9.08952 28.3839 10.3301 24.7709 12.2086 21.5781L58.7838 21.5781C60.6623 24.7709 61.9029 28.3839 62.3306 32.2422Z"
+                  fill="#2A2925"
+                />
+                
+                <!-- 圆形分割路径4：左上部分扇形 -->
+                <path
+                  d="M53.9901 15.5781C49.1584 11.034 42.6524 8.25 35.4962 8.25C28.34 8.25 21.8341 11.0341 17.0024 15.5781L53.9901 15.5781Z"
+                  fill="#2A2925"
+                />
+              </svg>
+            </span>
+          </div>
+          <!-- .sb__icon -->
+          
+          <!-- ===== 内容区域 ===== -->
+          <div class="sb__content">
+            <!-- 功能特性文本内容 -->
+            
+            <!-- 功能标题 -->
+            <h3 class="sb__title t-title">Ownership Splits</h3>
+            <!-- 
+              sb__title: 功能标题样式
+              t-title: 字体样式类
+            -->
+            
+            <!-- 功能描述 -->
+            <p class="sb__description">
+              Clear ownership splits so everyone gets their fair share.
+            </p>
+            <!-- sb__description: 功能描述样式 -->
+          </div>
+          <!-- .sb__content -->
+          
+          <!-- ===== 图片展示区域 ===== -->
+          <div class="sb__images sb__images--2">
+            <!-- 
+              sb__images: 图片容器
+              sb__images--2: BEM修饰符，表示显示2张图片的布局
+            -->
+            
+            <!-- 图片1：所有权分配界面截图 -->
+            <div class="sb__image">
+              <img
+                loading="lazy"
+                src="https://247artists.com/wp-content/uploads/2025/02/Splits-v1-720x721.jpg"
+                alt=""
+                width="720"
+                height="721"
+              />
+              <!-- 
+                loading="lazy": 懒加载属性，提升页面性能
+                width/height: 明确尺寸，防止布局偏移(CLS)
+              -->
+            </div>
+            <!-- .sb__image -->
+            
+            <!-- 图片2：所有权分配界面截图 -->
+            <div class="sb__image">
+              <img
+                loading="lazy"
+                src="https://247artists.com/wp-content/uploads/2025/02/Splits-v2-720x721.jpg"
+                alt=""
+                width="720"
+                height="721"
+              />
+            </div>
+            <!-- .sb__image -->
+          </div>
+          <!-- .sb__images -->
+        </div>
+        <!-- .sb__inner -->
+        
+        <!-- ===== 装饰元素 ===== -->
+        
+        <!-- 侧边计数器：显示当前功能序号 -->
+        <div class="sb__side-counter">01</div>
+        <!-- .sb__side-counter -->
+        
+        <!-- 装饰线条：垂直和水平线条，用于视觉分隔 -->
+        <div class="sb__side sb__side--vertical"></div>
+        <!-- sb__side--vertical: 垂直装饰线条 -->
+        <div class="sb__side sb__side--horizontal"></div>
+        <!-- sb__side--horizontal: 水平装饰线条 -->
+      </div>
+      <!-- .sb-feature -->
+      
+      <!-- ===== 功能特性2：协议 ===== -->
+      <div class="sb-feature js-feature">
+        <div class="sb__inner">
+          <div class="sb__counter">
+            <!-- 当前序号：02 -->
+            <div class="sb__counter__number sb__counter__number--index">
+              02
+            </div>
+            <!-- 总数量：05 -->
+            <div class="sb__counter__number sb__counter__number--total">
+              05
+            </div>
+          </div>
+          <!-- .sb__counter -->
+          
+          <div class="sb__icon">
+            <!-- 协议图标 - 文档图标 -->
+            <span class="a-svg a-svg--agreements">
+              <svg
+                width="71"
+                height="71"
+                viewBox="0 0 71 71"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <!-- 文档主体：矩形形状 -->
+                <path
+                  d="M24.4961 7.25H57.4961V63.25H24.4961V7.25Z"
+                  fill="#2A2925"
+                />
+                <!-- 文档装订线：左侧装订线 -->
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M19.4961 7.25391L19.4961 63.25H13.4961L13.4961 7.25391L19.4961 7.25391Z"
+                  fill="#2A2925"
+                />
+              </svg>
+            </span>
+          </div>
+          <!-- .sb__icon -->
+          
+          <div class="sb__content">
+            <h3 class="sb__title t-title">Agreements</h3>
+            <p class="sb__description">
+              Simple, ready-to-use agreements to keep you safe and focused
+              on your music.
+            </p>
+          </div>
+          <!-- .sb__content -->
+          
+          <div class="sb__images sb__images--2">
+            <div class="sb__image">
+              <img
+                loading="lazy"
+                src="https://247artists.com/wp-content/uploads/2025/02/Agreements-v2-720x721.jpg"
+                alt=""
+                width="720"
+                height="721"
+              />
+            </div>
+            <div class="sb__image">
+              <img
+                loading="lazy"
+                src="https://247artists.com/wp-content/uploads/2025/02/Agreements-v1-720x721.jpg"
+                alt=""
+                width="720"
+                height="721"
+              />
+            </div>
+          </div>
+          <!-- .sb__images -->
+        </div>
+        <!-- .sb__inner -->
+        
+        <div class="sb__side-counter">02</div>
+        <div class="sb__side sb__side--vertical"></div>
+        <div class="sb__side sb__side--horizontal"></div>
+      </div>
+      <!-- .sb-feature -->
+      
+      <!-- ===== 功能特性3：目录和文件管理 ===== -->
+      <div class="sb-feature js-feature">
+        <div class="sb__inner">
+          <div class="sb__counter">
+            <div class="sb__counter__number sb__counter__number--index">
+              03
+            </div>
+            <div class="sb__counter__number sb__counter__number--total">
+              05
+            </div>
+          </div>
+          <!-- .sb__counter -->
+          
+          <div class="sb__icon">
+            <!-- 文件管理图标 - 文件夹图标 -->
+            <span class="a-svg a-svg--files">
+              <svg
+                width="72"
+                height="72"
+                viewBox="0 0 72 72"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <!-- 剪切路径组：用于创建文件夹的复杂形状 -->
+                <g clip-path="url(#svg3-clip0_1653_1853)">
+                  <!-- 文件夹主体：底部矩形 -->
+                  <path
+                    d="M9.28076 25.7302H63.2808V65.7302H9.28076V25.7302Z"
+                    fill="#2A2925"
+                    style="
+                      fill: #2a2925;
+                      fill: color(display-p3 0.1647 0.1608 0.1451);
+                      fill-opacity: 1;
+                    "
+                  />
+                  <!-- 
+                    SVG样式说明：
+                    - 基础fill: 十六进制颜色
+                    - display-p3: 广色域颜色空间，提供更丰富的色彩
+                    - fill-opacity: 填充透明度
+                  -->
+                  
+                  <!-- 文件夹标签：顶部标签部分 -->
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M55.2902 11.5272H17.2722V5.52722H55.2902V11.5272ZM59.3442 21.5272H13.2192V15.5272H59.3442V21.5272Z"
+                    fill="#2A2925"
+                    style="
+                      fill: #2a2925;
+                      fill: color(display-p3 0.1647 0.1608 0.1451);
+                      fill-opacity: 1;
+                    "
+                  />
+                </g>
+                
+                <!-- 定义剪切路径：限制图形显示区域 -->
+                <defs>
+                  <clipPath id="svg3-clip0_1653_1853">
+                    <rect
+                      width="55"
+                      height="62"
+                      fill="white"
+                      style="fill: white; fill-opacity: 1"
+                      transform="translate(8.5 4.69922)"
+                    />
+                    <!-- 
+                      剪切路径原理：
+                      - 定义矩形区域作为剪切边界
+                      - transform: 移动剪切区域到正确位置
+                      - 只有剪切区域内的图形才会显示
+                    -->
+                  </clipPath>
+                </defs>
+              </svg>
+            </span>
+          </div>
+          <!-- .sb__icon -->
+          
+          <div class="sb__content">
+            <h3 class="sb__title t-title">Catalog and File Management</h3>
+            <p class="sb__description">
+              Organize and share your entire catalog in one secure place.
+            </p>
+          </div>
+          <!-- .sb__content -->
+          
+          <div class="sb__images sb__images--2">
+            <div class="sb__image">
+              <img
+                loading="lazy"
+                src="https://247artists.com/wp-content/uploads/2025/02/Catalog-v1-720x720.jpg"
+                alt=""
+                width="720"
+                height="720"
+              />
+            </div>
+            <div class="sb__image">
+              <img
+                loading="lazy"
+                src="https://247artists.com/wp-content/uploads/2025/02/Catalog-v2-720x721.jpg"
+                alt=""
+                width="720"
+                height="721"
+              />
+            </div>
+          </div>
+          <!-- .sb__images -->
+        </div>
+        <!-- .sb__inner -->
+        
+        <div class="sb__side-counter">03</div>
+        <div class="sb__side sb__side--vertical"></div>
+        <div class="sb__side sb__side--horizontal"></div>
+      </div>
+      <!-- .sb-feature -->
+      
+      <!-- ===== 功能特性4：歌曲注册 ===== -->
+      <div class="sb-feature js-feature">
+        <div class="sb__inner">
+          <div class="sb__counter">
+            <div class="sb__counter__number sb__counter__number--index">
+              04
+            </div>
+            <div class="sb__counter__number sb__counter__number--total">
+              05
+            </div>
+          </div>
+          <!-- .sb__counter -->
+          
+          <div class="sb__icon">
+            <!-- 歌曲注册图标 - 美元符号图标 -->
+            <span class="a-svg a-svg--registration">
+              <svg
+                width="71"
+                height="71"
+                viewBox="0 0 71 71"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <!-- 美元符号的竖线部分 -->
+                <path
+                  d="M36.0251 33.0908H32.8821V29.1149H36.0251C37.1803 29.1149 38.0668 29.9477 38.0668 31.076C38.0668 32.2043 37.1803 33.0908 36.0251 33.0908Z"
+                  fill="#2A2925"
+                />
+                <!-- 美元符号主体：圆形边框和S形路径 -->
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M35.4975 63.3594C51.0097 63.3594 63.5849 50.7744 63.5849 35.25C63.5849 19.7256 51.0097 7.14062 35.4975 7.14062C19.9853 7.14062 7.41016 19.7256 7.41016 35.25C7.41016 50.7744 19.9853 63.3594 35.4975 63.3594ZM28.9062 25.2734V44.078H32.8821V36.9054H34.9237L39.1682 44.078H44.0037L39.0876 36.2876C40.9412 35.3742 42.0963 33.4937 42.0963 31.076C42.0963 27.8524 39.3294 25.2734 36.1595 25.2734H28.9062Z"
+                  fill="#2A2925"
+                />
+                <!-- 
+                  SVG路径复杂性说明：
+                  - 使用多个贝塞尔曲线(C命令)创建平滑的S形
+                  - fill-rule="evenodd": 奇偶填充规则，用于复杂形状
+                  - clip-rule="evenodd": 奇偶剪切规则
+                -->
+              </svg>
+            </span>
+          </div>
+          <!-- .sb__icon -->
+          
+          <div class="sb__content">
+            <h3 class="sb__title t-title">Song Registrations</h3>
+            <p class="sb__description">
+              Simple, fast song registration to make sure everyone's
+              credited and paid.
+            </p>
+          </div>
+          <!-- .sb__content -->
+          
+          <div class="sb__images sb__images--2">
+            <div class="sb__image">
+              <img
+                loading="lazy"
+                src="https://247artists.com/wp-content/uploads/2025/02/Song-Registration-v2-720x720.jpg"
+                alt=""
+                width="720"
+                height="720"
+              />
+            </div>
+            <div class="sb__image">
+              <img
+                loading="lazy"
+                src="https://247artists.com/wp-content/uploads/2025/02/Song-Registration-v1-720x721.jpg"
+                alt=""
+                width="720"
+                height="721"
+              />
+            </div>
+          </div>
+          <!-- .sb__images -->
+        </div>
+        <!-- .sb__inner -->
+        
+        <div class="sb__side-counter">04</div>
+        <div class="sb__side sb__side--vertical"></div>
+        <div class="sb__side sb__side--horizontal"></div>
+      </div>
+      <!-- .sb-feature -->
+      
+      <!-- ===== 功能特性5：支付合作伙伴和团队 ===== -->
+      <div class="sb-feature js-feature">
+        <div class="sb__inner">
+          <div class="sb__counter">
+            <div class="sb__counter__number sb__counter__number--index">
+              05
+            </div>
+            <div class="sb__counter__number sb__counter__number--total">
+              05
+            </div>
+          </div>
+          <!-- .sb__counter -->
+          
+          <div class="sb__icon">
+            <!-- 支付图标 - 美元符号图标 -->
+            <span class="a-svg a-svg--pay">
+              <svg
+                width="71"
+                height="71"
+                viewBox="0 0 71 71"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <!-- 复杂的美元符号设计，包含圆形边框和内部S形 -->
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M35.4975 63.3594C51.0097 63.3594 63.5849 50.7744 63.5849 35.25C63.5849 19.7256 51.0097 7.14062 35.4975 7.14062C19.9853 7.14062 7.41016 19.7256 7.41016 35.25C7.41016 50.7744 19.9853 63.3594 35.4975 63.3594ZM37.2746 25.1623V21.7812H33.4064V25.105C30.3405 25.7068 28.2201 27.9417 28.2201 30.8644C28.2201 35.1895 31.8861 36.1375 34.8948 36.9156C36.9888 37.4571 38.7645 37.9163 38.7645 39.3744C38.7645 40.6924 37.4751 41.552 35.6127 41.552C33.6069 41.552 32.2029 40.4059 32.2029 38.6294H28.0195C28.0195 41.9245 30.1972 44.5033 33.4064 45.3056V48.7154H37.2746V45.4202C40.6556 44.8185 42.9766 42.4403 42.9766 39.3744C42.9766 34.7633 39.1252 33.8162 36.0651 33.0637C34.0481 32.5676 32.3748 32.1562 32.3748 30.8357C32.3748 29.6609 33.3777 28.9446 34.9823 28.9446C36.8161 28.9446 37.9336 30.0907 37.9622 31.6093H42.3462C42.3462 28.6294 40.7416 25.936 37.2746 25.1623Z"
+                  fill="#2A2925"
+                />
+              </svg>
+            </span>
+          </div>
+          <!-- .sb__icon -->
+          
+          <div class="sb__content">
+            <h3 class="sb__title t-title">Paying Collaborators & Team</h3>
+            <p class="sb__description">
+              Transparent payouts so your team always knows what they've
+              earned.
+            </p>
+          </div>
+          <!-- .sb__content -->
+          
+          <div class="sb__images sb__images--2">
+            <div class="sb__image">
+              <img
+                loading="lazy"
+                src="https://247artists.com/wp-content/uploads/2025/02/Payments-v2-720x721.jpg"
+                alt=""
+                width="720"
+                height="721"
+              />
+            </div>
+            <div class="sb__image">
+              <img
+                loading="lazy"
+                src="https://247artists.com/wp-content/uploads/2025/02/Payments-v1-720x721.jpg"
+                alt=""
+                width="720"
+                height="721"
+              />
+            </div>
+          </div>
+          <!-- .sb__images -->
+        </div>
+        <!-- .sb__inner -->
+        
+        <div class="sb__side-counter">05</div>
+        <div class="sb__side sb__side--vertical"></div>
+        <div class="sb__side sb__side--horizontal"></div>
+      </div>
+      <!-- .sb-feature -->
+    </div>
+    <!-- .s__features -->
+    
+    <!-- ===== 动画和交互元素 ===== -->
+    
+    <!-- 标尺装饰元素 -->
+    <div class="s__ruler js-ruler"></div>
+    <!-- 
+      s__ruler: 标尺样式，通常是一条水平线
+      js-ruler: JavaScript钩子，用于滚动动画效果
+      动画原理：通过CSS transform scaleX 实现从左到右的展开效果
+    -->
+    
+    <!-- Canvas画布，用于动态图形效果 -->
+    <canvas class="s__canvas js-canvas"></canvas>
+    <!-- 
+      s__canvas: Canvas容器样式
+      js-canvas: JavaScript钩子，用于动态图形绘制
+      
+      Canvas动画原理：
+      1. JavaScript监听滚动事件
+      2. 计算滚动进度和元素位置
+      3. 使用Canvas 2D API绘制动态图形
+      4. 可能包括：粒子效果、连线动画、几何图形变换
+      5. 通过requestAnimationFrame实现流畅动画
+    -->
+  </div>
+  <!-- .s__inner -->
+</div>
+<!-- .s-features-home -->
+
+<!-- ===== JavaScript运行时和配置 ===== -->
+
+<!-- GSAP动画库 -->
+<script src="https://247artists.com/wp-content/themes/creatorspc/build/js/npm-gsap.js?ver=179924284"></script>
+<!-- 
+  GSAP (GreenSock Animation Platform) 动画库：
+  - 高性能的JavaScript动画库
+  - 支持CSS属性、SVG、Canvas动画
+  - 提供时间线、缓动函数、滚动触发等高级功能
+  - 比CSS动画更灵活，性能更好
+-->
+
+<!-- Luge工具库 -->
+<script src="https://247artists.com/wp-content/themes/creatorspc/build/js/npm-luge.js?ver=179924284"></script>
+<!-- 
+  Luge: 轻量级JavaScript工具库
+  - 可能提供DOM操作、事件处理、工具函数
+  - 与GSAP配合使用，提供额外的功能支持
+-->
+
+<!-- 全局配置脚本 -->
+<script>
+  window.plr = {
+    // 模板目录路径，用于动态加载资源
+    tpl_dir: "https:\/\/247artists.com\/wp-content\/themes\/creatorspc",
+    
+    // 组件和布局的bundles配置
+    // 这是模块化加载系统的核心配置
+    bundles: {
+      components: {
+        // 教育首页组件配置（包含JS和CSS）
+        "s-education-home": { js: true, css: true },
+        // 功能特性首页组件配置（包含JS和CSS）
+        "s-features-home": { js: true, css: true },
+        // 网站滚动条组件配置（包含JS和CSS）
+        "site-scrollbar": { js: true, css: true },
+        // 按钮组件配置（包含JS和CSS）
+        "btn-cta": { js: true, css: true },
+      },
+      // 布局配置
+      layouts: { "front-page": [] },
+    },
+    
+    // 版本号，用于缓存控制
+    version: "179924284",
+    
+    // AJAX请求URL，用于动态内容加载
+    ajaxurl: "https:\/\/247artists.com\/wp-admin\/admin-ajax.php",
+  };
+  
+  /* 
+    模块化加载系统原理：
+    1. 根据bundles配置，动态加载需要的JS和CSS文件
+    2. 避免加载不必要的资源，提升性能
+    3. 支持按需加载，减少初始页面大小
+    4. 版本号控制缓存，确保更新后用户获取最新资源
+  */
+</script>
+
+<!-- 主脚本文件，异步加载 -->
+<script
+  async
+  defer
+  src="https://247artists.com/wp-content/themes/creatorspc/build/js/main.js?ver=179924284"
+></script>
+<!-- 
+  async defer 属性说明：
+  - async: 异步加载脚本，不阻塞HTML解析
+  - defer: 延迟执行，等待HTML解析完成后执行
+  - 组合使用：异步加载 + 延迟执行，最佳性能
+-->
+
+<!-- 显式加载教育首页组件脚本 -->
+<script src="https://247artists.com/wp-content/themes/creatorspc/build/js/components/s-education-home.js?ver=179924284"></script>
+<!-- 
+  组件脚本加载原理：
+  1. 确保组件JavaScript正确挂载
+  2. 初始化组件特定的交互和动画
+  3. 绑定事件监听器
+  4. 设置滚动触发动画
+-->
+
+<!-- 滚动条组件标记 -->
+<div class="site-scrollbar" data-plr-component="site-scrollbar">
+  <div class="site-scrollbar__track"></div>
+  <div class="site-scrollbar__thumb js-thumb"></div>
+</div>
+<!-- 
+  自定义滚动条原理：
+  1. 隐藏浏览器默认滚动条
+  2. 创建自定义滚动条样式
+  3. 通过JavaScript同步自定义滚动条与页面滚动
+  4. 提供更好的视觉体验和品牌一致性
+-->
+
+</body>
+</html>
+
+<!-- ===== 文档总结和架构分析 ===== -->
+
+<!-- 
+  整体架构设计原理：
+
+  1. 组件化设计：
+     - 使用BEM命名规范（Block__Element--Modifier）
+     - 每个组件独立，可复用
+     - 通过data-plr-component属性实现自动加载
+
+  2. 性能优化策略：
+     - 懒加载图片（loading="lazy"）
+     - 异步加载脚本（async defer）
+     - 版本号控制缓存
+     - 按需加载组件资源
+
+  3. 动画系统：
+     - GSAP提供高性能动画
+     - 滚动触发动画（ScrollTrigger）
+     - Canvas动态图形效果
+     - CSS transform硬件加速
+
+  4. 响应式设计：
+     - 移动优先设计
+     - 灵活的网格系统
+     - 自适应图片和内容
+
+  5. 可访问性：
+     - 语义化HTML标签
+     - 适当的ARIA属性
+     - 键盘导航支持
+     - 屏幕阅读器友好
+
+  6. 模块化CSS：
+     - 组件样式分离
+     - 原子化设计系统
+     - 可维护的样式架构
+-->
