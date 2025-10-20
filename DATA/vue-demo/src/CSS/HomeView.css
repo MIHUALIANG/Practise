@@ -1,0 +1,259 @@
+.container {
+  margin: 0px auto;
+  /* width: 1500px; */
+  width: 100%;
+  /* height: 600px; */
+  height: 100%;
+  /* background-color: rgb(182, 241, 241); */
+  display: flex;
+}
+
+.aside {
+  height: 600px;
+  background-color: #fff;
+  transition: width 1s; /* 平滑收缩动画 */
+  overflow: hidden;
+}
+
+.logo-container {
+  height: 40px;
+  background-color: rgb(37, 123, 133);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.logo-container span {
+  height: 10px;
+  line-height: 10px;
+  color: #0b423c;
+  margin: 10px;
+  font-size: 10px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s;
+}
+
+.logo {
+  height: 20px;
+  width: 20px;
+}
+
+.el-menu {
+  border: none;
+  transition: width 0.5s ease;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', Arial, sans-serif;
+  font-size: 14px;
+}
+
+.el-menu span {
+  transition: opacity 0.4s ease 0.1s;
+  font-weight: 500;
+}
+
+.el-menu--collapse span {
+  opacity: 0;
+}
+
+.el-menu-vertical-demo {
+  background-color: #fff;
+  width: 100%; /* 自动填充侧边栏宽度 */
+  text-align: left;
+}
+
+.el-menu-item-group .el-menu-item {
+  padding-left: 80px !important;
+  border-radius: 15px 0 0 15px; /* 默认状态也保持圆角 */
+  /* background-color: azure; */
+}
+
+.el-menu-item-group__title {
+  color: #606266;
+  padding-right: 40px !important;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* .el-menu-item-group:hover .el-menu-item-group__title {
+  font-weight: bold;
+} */
+
+.el-sub-menu .el-menu-item:hover {
+  color: rgb(37, 123, 133);
+  border-radius: 15px 0 0 15px;
+  background-color: rgba(182, 241, 241, 0.3);
+}
+
+/* 设置选中后的高亮 */
+.el-menu-item.is-active {
+  background-color: rgba(182, 241, 241, 0.3);
+  color: rgb(37, 123, 133);
+  font-weight: 600;
+  border-radius: 15px 0 0 15px;
+}
+
+.collapse-btn {
+  margin: 4px auto;
+  /* display: block; */
+  transition: transform 0.3s;
+}
+
+.el-header .el-button {
+  float: left;
+  margin-left: 20px;
+}
+
+.el-breadcrumb {
+  line-height: 40px;
+  margin-left: 10px;
+  float: left;
+}
+
+.el-main .nav {
+  background-color: #fff;
+  height: 40px;
+  width: 100%;
+}
+.nav > span {
+  display: block;
+  float: left;
+  margin: 10px 0px 10px 10px;
+}
+
+.nav-icon {
+  float: left;
+  margin: 10px 10px 10px 30px;
+}
+
+.el-container .el-header {
+  height: 40px;
+  background-color: #fff;
+  padding: 0px;
+}
+
+.el-dropdown {
+  line-height: 40px;
+  float: right;
+}
+
+.avatar {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin-left: 15px;
+  margin-right: 5px;
+}
+
+.el-dropdown-item .el-icon {
+  vertical-align: middle;
+  margin-top: 0;
+}
+
+.el-main .home {
+  margin: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.el-main,
+.home > div {
+  padding: 0;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.el-main .title {
+  font-size: 14px;
+  font-weight: bold;
+  padding-right: 10px;
+  display: inline-block;
+  min-width: 480px;
+  text-align: right;
+}
+
+/* 设置按钮位置 */
+.button-submit {
+  margin: 0px 0px 0px 500px;
+}
+
+/* 输入框对齐样式 */
+.mainstyle {
+  margin: 10px 0px;
+  display: flex;
+  align-items: center;
+}
+
+.mainstyle .el-input,
+.mainstyle .el-select,
+.mainstyle .el-date-picker,
+.mainstyle .el-segmented,
+.mainstyle .el-radio-group {
+  margin-left: 10px;
+}
+
+.el-segmented {
+  --el-segmented-item-selected-color: var(--el-text-color-primary);
+  --el-segmented-item-selected-bg-color: #38a599;
+  --el-border-radius-base: 16px;
+}
+
+.el-table__header-wrapper .el-table__header {
+  margin: 0px auto;
+  font-weight: 100;
+}
+
+.el-table__body-wrapper {
+  background-color: #fff;
+  color: #606266;
+  font-weight: bold;
+  text-align: center;
+  font-size: 14px;
+}
+
+.cell {
+  text-align: center;
+}
+
+.button-clear .el-button {
+  margin: 10px auto;
+}
+
+/* 有关service的设置 */
+
+.service {
+  height: 2000px;
+}
+
+.el-card {
+  float: left;
+  margin: 10px;
+  position: relative;
+}
+
+.card-1 {
+  width: 500px;
+}
+
+.card-2 {
+  width: 300px;
+}
+
+.card-3 {
+  width: 200px;
+  height: 600px;
+}
+
+.card-4 {
+  width: 200px;
+  position: absolute;
+  top: 520px;
+  left: 820px;
+}
