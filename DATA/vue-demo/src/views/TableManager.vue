@@ -3915,6 +3915,6 @@ export default {
 
 .database-manager .el-form-item.init {
   /* padding-left: 220px !important; */
-  padding-right: 447px !important;
+  padding-right: 450px !important;
 }
 </style>
