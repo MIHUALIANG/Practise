@@ -16,11 +16,11 @@
                   placeholder="请输入表名"
                 ></el-input>
               </el-form-item>
-              <el-form-item class="init" label="字段定义">
+              <el-form-item label="字段定义">
                 <el-table
                   :data="newTable.fields"
                   border
-                  style="width: 100%"
+                  style="width: 600px"
                   :cell-style="{ padding: '8px', textAlign: 'center' }"
                   :header-cell-style="{
                     background: '#f5f7fa',
@@ -29,7 +29,7 @@
                     padding: '12px 8px',
                   }"
                 >
-                  <el-table-column label="字段名" width="100">
+                  <el-table-column label="字段名">
                     <template #default="{ row }">
                       <el-input
                         v-model="row.name"
@@ -88,14 +88,11 @@
                     </template>
                   </el-table-column>
                 </el-table>
-                <el-button
-                  type="primary"
-                  @click="addNewTableField"
-                  style="margin-top: 10px"
-                  >添加字段</el-button
-                >
               </el-form-item>
               <el-form-item>
+                <el-button type="primary" @click="addNewTableField"
+                  >添加字段</el-button
+                >
                 <el-button type="primary" @click="createTable"
                   >创建表</el-button
                 >
@@ -373,10 +370,11 @@
 
             <el-table
               :data="relations"
+              v-loading="loading"
               border
               style="width: 100%; margin-top: 20px"
             >
-              <el-table-column label="关系名称" prop="relationName" width="120">
+              <el-table-column label="关系名称" prop="relationName">
                 <template #default="{ row }">
                   {{ row.relationName || "未命名" }}
                 </template>
@@ -401,7 +399,7 @@
                 prop="foreignColumn"
                 width="150"
               ></el-table-column>
-              <el-table-column label="关系类型" width="120">
+              <el-table-column label="关系类型" width="150">
                 <template #default="{ row }">
                   <el-tag
                     v-if="row.relationType === 'one-to-one'"
@@ -491,12 +489,10 @@
       <el-tab-pane label="跨表更新" name="cross-table-update">
         <div class="tab-content">
           <div class="update-section">
-            <h3 class="section-title">🔄 跨表关联数据更新</h3>
-
             <!-- 条件设置区域 -->
             <el-card class="subsection-card">
               <template #header>
-                <span>1. 设置更新条件</span>
+                <span>设置更新条件</span>
               </template>
 
               <div
@@ -505,22 +501,31 @@
                 class="condition-item"
               >
                 <el-select
-                  v-model="condition.field"
-                  placeholder="选择字段"
-                  style="width: 200px"
+                  v-model="condition.table"
+                  placeholder="选择表"
+                  style="width: 150px"
+                  @change="condition.field = ''"
                 >
-                  <el-option-group
+                  <el-option
                     v-for="table in tables"
                     :key="table.name"
                     :label="table.name"
-                  >
-                    <el-option
-                      v-for="col in getTableColumns(table.name)"
-                      :key="`${table.name}.${col.name}`"
-                      :label="`${table.name}.${col.name}`"
-                      :value="`${table.name}.${col.name}`"
-                    ></el-option>
-                  </el-option-group>
+                    :value="table.name"
+                  ></el-option>
+                </el-select>
+
+                <el-select
+                  v-model="condition.field"
+                  placeholder="选择字段"
+                  style="width: 200px; margin-left: 10px"
+                  :disabled="!condition.table"
+                >
+                  <el-option
+                    v-for="col in getTableColumns(condition.table)"
+                    :key="`${condition.table}.${col.name}`"
+                    :label="col.name"
+                    :value="`${condition.table}.${col.name}`"
+                  ></el-option>
                 </el-select>
 
                 <el-select
@@ -565,18 +570,37 @@
             <!-- 更新字段设置区域 -->
             <el-card class="subsection-card">
               <template #header>
-                <span>2. 设置更新字段</span>
+                <span>设置更新字段</span>
               </template>
 
               <el-form
                 :model="updateFieldForm"
-                label-width="450px"
+                label-width="550px"
                 style="
                   display: flex;
                   flex-direction: column;
                   align-items: center;
                 "
               >
+                <el-form-item
+                  label="目标表"
+                  style="width: 100%; display: flex; justify-content: center"
+                >
+                  <el-select
+                    v-model="updateFieldForm.table"
+                    placeholder="选择目标表"
+                    style="width: 300px"
+                    @change="updateFieldForm.field = ''"
+                  >
+                    <el-option
+                      v-for="table in tables"
+                      :key="table.name"
+                      :label="table.name"
+                      :value="table.name"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+
                 <el-form-item
                   label="目标字段"
                   style="width: 100%; display: flex; justify-content: center"
@@ -585,19 +609,14 @@
                     v-model="updateFieldForm.field"
                     placeholder="选择要更新的字段"
                     style="width: 300px"
+                    :disabled="!updateFieldForm.table"
                   >
-                    <el-option-group
-                      v-for="table in tables"
-                      :key="table.name"
-                      :label="table.name"
-                    >
-                      <el-option
-                        v-for="col in getTableColumns(table.name)"
-                        :key="`${table.name}.${col.name}`"
-                        :label="`${table.name}.${col.name}`"
-                        :value="`${table.name}.${col.name}`"
-                      ></el-option>
-                    </el-option-group>
+                    <el-option
+                      v-for="col in getTableColumns(updateFieldForm.table)"
+                      :key="`${updateFieldForm.table}.${col.name}`"
+                      :label="col.name"
+                      :value="`${updateFieldForm.table}.${col.name}`"
+                    ></el-option>
                   </el-select>
                 </el-form-item>
 
@@ -611,7 +630,50 @@
                     style="width: 300px"
                   ></el-input>
                 </el-form-item>
+
+                <el-form-item
+                  label="操作者"
+                  required
+                  style="width: 100%; display: flex; justify-content: center"
+                >
+                  <el-input
+                    v-model="updateFieldForm.operator"
+                    placeholder="请输入操作者姓名（必填）"
+                    style="width: 300px"
+                    clearable
+                  ></el-input>
+                </el-form-item>
               </el-form>
+            </el-card>
+
+            <!-- 跨表更新安全设置 -->
+            <el-card class="subsection-card">
+              <div
+                style="
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  padding: 20px;
+                "
+              >
+                <span style="margin-right: 15px; font-size: 14px"
+                  >禁止未定义关系的跨表更新</span
+                >
+                <el-switch
+                  v-model="updateSettings.strictMode"
+                  active-text="已开启"
+                  inactive-text="已关闭"
+                >
+                </el-switch>
+                <el-tooltip
+                  content="开启后，只有明确定义了关联关系的表之间才能进行跨表更新，避免误操作"
+                  placement="top"
+                >
+                  <el-icon style="margin-left: 10px; cursor: pointer">
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </div>
             </el-card>
 
             <!-- 操作按钮 -->
@@ -625,6 +687,9 @@
               </el-button>
               <el-button @click="previewUpdate" type="success">
                 预览影响记录
+              </el-button>
+              <el-button @click="resetCrossTableUpdate" type="info">
+                重置表单
               </el-button>
             </div>
 
@@ -643,6 +708,10 @@
                 <template #default>
                   <p>匹配记录数: {{ updateResult.matchedCount }}</p>
                   <p>实际更新数: {{ updateResult.updatedCount }}</p>
+                  <p>
+                    操作者:
+                    {{ updateResult.operator || updateFieldForm.operator }}
+                  </p>
                   <p>执行时间: {{ formatDateTime(updateResult.timestamp) }}</p>
                 </template>
               </el-alert>
@@ -660,8 +729,6 @@
       <el-tab-pane label="更新历史" name="update-history">
         <div class="tab-content">
           <div class="history-section">
-            <h3 class="section-title">📋 更新操作历史</h3>
-
             <!-- 筛选条件 -->
             <el-card class="subsection-card">
               <template #header>
@@ -732,6 +799,11 @@
                     {{ formatDateTime(row.timestamp) }}
                   </template>
                 </el-table-column>
+                <el-table-column label="操作者" width="120">
+                  <template #default="{ row }">
+                    {{ row.operator || "未知" }}
+                  </template>
+                </el-table-column>
                 <el-table-column label="更新字段" width="200">
                   <template #default="{ row }">
                     {{ row.updateInfo.field }}
@@ -793,8 +865,6 @@
       <el-tab-pane label="统计分析" name="statistics">
         <div class="tab-content">
           <div class="statistics-section">
-            <h3 class="section-title">📊 数据统计分析</h3>
-
             <!-- 统计条件 -->
             <el-card class="subsection-card">
               <template #header>
@@ -903,71 +973,10 @@
       <el-tab-pane label="高级查询" name="advanced-query">
         <div class="tab-content">
           <div class="query-section">
-            <h3 class="section-title">🔍 高级查询</h3>
-
-            <!-- 表选择区域 -->
-            <el-card class="subsection-card">
-              <template #header>
-                <span>1. 选择查询表</span>
-              </template>
-
-              <div
-                v-for="(table, index) in queryConfig.tables"
-                :key="index"
-                class="table-item"
-              >
-                <el-select
-                  v-model="table.name"
-                  placeholder="选择表"
-                  @change="onTableChange(table, index)"
-                  style="width: 200px"
-                >
-                  <el-option
-                    v-for="t in availableTables"
-                    :key="t"
-                    :label="t"
-                    :value="t"
-                  ></el-option>
-                </el-select>
-
-                <el-input
-                  v-model="table.alias"
-                  placeholder="表别名"
-                  style="width: 120px; margin-left: 10px"
-                ></el-input>
-
-                <el-button
-                  @click="removeTable(index)"
-                  type="danger"
-                  text
-                  style="margin-left: 10px"
-                  :disabled="queryConfig.tables.length === 1"
-                >
-                  删除
-                </el-button>
-              </div>
-
-              <el-button
-                @click="addTable"
-                type="primary"
-                style="margin-top: 10px"
-                >添加表</el-button
-              >
-
-              <!-- 表关系设置按钮 -->
-              <el-button
-                v-if="queryConfig.tables.length > 1"
-                @click="showRelationDialog = true"
-                type="success"
-                style="margin-top: 10px; margin-left: 10px"
-                >设置表关系</el-button
-              >
-            </el-card>
-
             <!-- 查询条件区域 -->
             <el-card class="subsection-card">
               <template #header>
-                <span>2. 设置查询条件</span>
+                <span>设置查询条件</span>
               </template>
 
               <div
@@ -976,22 +985,33 @@
                 class="condition-item"
               >
                 <el-select
+                  v-model="condition.table"
+                  placeholder="选择表"
+                  style="width: 150px"
+                  @change="condition.field = ''"
+                >
+                  <el-option
+                    v-for="table in availableTables"
+                    :key="table"
+                    :label="table"
+                    :value="table"
+                  ></el-option>
+                </el-select>
+
+                <el-select
                   v-model="condition.field"
                   placeholder="选择字段"
-                  style="width: 200px"
+                  style="width: 200px; margin-left: 10px"
+                  :disabled="!condition.table"
                 >
-                  <el-option-group
-                    v-for="table in queryConfig.tables"
-                    :key="table.name"
-                    :label="table.alias || table.name"
-                  >
-                    <el-option
-                      v-for="col in getTableColumns(table.name)"
-                      :key="`${table.name}.${col.name}`"
-                      :label="`${table.alias || table.name}.${col.name}`"
-                      :value="`${table.alias || table.name}.${col.name}`"
-                    ></el-option>
-                  </el-option-group>
+                  <el-option
+                    v-for="col in getTableColumns(condition.table)"
+                    :key="`${condition.table}.${col.name}`"
+                    :label="col.name"
+                    :value="
+                      condition.table ? `${condition.table}.${col.name}` : ''
+                    "
+                  ></el-option>
                 </el-select>
 
                 <el-select
@@ -1054,6 +1074,9 @@
                 :disabled="!queryResult.data"
                 >导出 JSON</el-button
               >
+              <el-button @click="resetAdvancedQuery" type="warning">
+                重置表单
+              </el-button>
             </div>
 
             <!-- 查询结果 -->
@@ -1321,7 +1344,7 @@
     <!-- 预览更新对话框 -->
     <el-dialog
       v-model="previewDialogVisible"
-      title="🔍 更新预览"
+      title="更新预览"
       width="90%"
       :close-on-click-modal="false"
       class="preview-dialog"
@@ -1439,10 +1462,6 @@
       <div v-if="modificationDetails">
         <!-- 修改前后对比表格 -->
         <div v-if="getDetailedComparisonData().length > 0">
-          <div class="comparison-header">
-            <h4>📊 修改前后对比</h4>
-          </div>
-
           <el-table
             :data="getDetailedComparisonData()"
             border
@@ -1518,6 +1537,10 @@
             {{ formatDateTime(modificationDetails.timestamp) }}
           </p>
           <p>
+            <strong>操作者:</strong>
+            {{ modificationDetails.operator || "未知" }}
+          </p>
+          <p>
             <strong>影响:</strong> {{ modificationDetails.update_count }} 条记录
           </p>
           <p><strong>更新条件:</strong> {{ getConditionsText() }}</p>
@@ -1543,7 +1566,13 @@ import {
   watch,
 } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Edit, Close, Check, Document } from "@element-plus/icons-vue";
+import {
+  Edit,
+  Close,
+  Check,
+  Document,
+  QuestionFilled,
+} from "@element-plus/icons-vue";
 import * as echarts from "echarts";
 
 export default {
@@ -1557,9 +1586,8 @@ export default {
     const queryLoading = ref(false);
 
     const queryConfig = ref({
-      tables: [{ name: "", alias: "t1" }],
       joins: [],
-      conditions: [{ field: "", operator: "=", value: "" }],
+      conditions: [{ table: "", field: "", operator: "=", value: "" }],
     });
 
     const queryResult = ref({ data: null, count: 0, sql: "", totalCount: 0 });
@@ -1603,15 +1631,6 @@ export default {
       }
     };
 
-    const onTableChange = async (table, index) => {
-      if (table.name) {
-        await fetchTableColumns(table.name);
-        if (!table.alias) {
-          table.alias = `t${index + 1}`;
-        }
-      }
-    };
-
     const getTableColumns = (tableName) => {
       // 如果表名为空，直接返回空数组
       if (!tableName) return [];
@@ -1623,22 +1642,9 @@ export default {
       return tableColumns.value[tableName] || [];
     };
 
-    const addTable = () => {
-      const newIndex = queryConfig.value.tables.length;
-      queryConfig.value.tables.push({
-        name: "",
-        alias: `t${newIndex + 1}`,
-      });
-    };
-
-    const removeTable = (index) => {
-      if (queryConfig.value.tables.length > 1) {
-        queryConfig.value.tables.splice(index, 1);
-      }
-    };
-
     const addCondition = () => {
       queryConfig.value.conditions.push({
+        table: "",
         field: "",
         operator: "=",
         value: "",
@@ -1649,14 +1655,45 @@ export default {
       queryConfig.value.conditions.splice(index, 1);
     };
 
+    const resetAdvancedQuery = () => {
+      // 重置查询配置
+      queryConfig.value = {
+        joins: [],
+        conditions: [{ table: "", field: "", operator: "=", value: "" }],
+      };
+
+      // 重置查询结果
+      queryResult.value = { data: null, count: 0, sql: "", totalCount: 0 };
+
+      // 重置分页
+      currentPage.value = 1;
+      pageSize.value = 20;
+      totalRecords.value = 0;
+
+      ElMessage.success("查询表单已重置");
+    };
+
     const executeQuery = async () => {
-      if (queryConfig.value.tables.some((table) => !table.name)) {
-        ElMessage.warning("请选择所有表");
+      // 验证条件是否完整
+      if (
+        queryConfig.value.conditions.some(
+          (c) => !c.table || !c.field || !c.value
+        )
+      ) {
+        ElMessage.warning("请填写完整的查询条件（表、字段和值）");
         return;
       }
 
-      // 如果有多个表，检查是否存在关系，如果没有关系则提示用户
-      if (queryConfig.value.tables.length > 1) {
+      // 从条件中提取所有涉及的表
+      const involvedTables = new Set();
+      queryConfig.value.conditions.forEach((condition) => {
+        if (condition.table) {
+          involvedTables.add(condition.table);
+        }
+      });
+
+      // 如果有多个表，检查是否存在关系
+      if (involvedTables.size > 1) {
         const hasJoins =
           queryConfig.value.joins && queryConfig.value.joins.length > 0;
 
@@ -1688,7 +1725,9 @@ export default {
       try {
         // 准备分页参数
         const queryParams = {
-          ...queryConfig.value,
+          tables: extractTablesFromConditions(),
+          joins: queryConfig.value.joins || [],
+          conditions: queryConfig.value.conditions || [],
           page: currentPage.value,
           pageSize: pageSize.value,
         };
@@ -1712,20 +1751,27 @@ export default {
     // 根据表间关系自动生成JOIN条件
     const generateAutoJoins = () => {
       const autoJoins = [];
-      const selectedTables = queryConfig.value.tables.map((t) => t.name);
+
+      // 从条件中提取所有涉及的表
+      const selectedTables = new Set();
+      queryConfig.value.conditions.forEach((condition) => {
+        if (condition.table) {
+          selectedTables.add(condition.table);
+        }
+      });
+      const selectedTablesArray = Array.from(selectedTables);
 
       // 遍历所有关系，找出与所选表相关的
       relations.value.forEach((relation) => {
-        const primaryTableIndex = selectedTables.indexOf(relation.primaryTable);
-        const foreignTableIndex = selectedTables.indexOf(relation.foreignTable);
+        const primaryTableIndex = selectedTablesArray.indexOf(
+          relation.primaryTable
+        );
+        const foreignTableIndex = selectedTablesArray.indexOf(
+          relation.foreignTable
+        );
 
         // 如果两个表都被选中，则创建JOIN条件
         if (primaryTableIndex !== -1 && foreignTableIndex !== -1) {
-          const primaryAlias =
-            queryConfig.value.tables[primaryTableIndex].alias;
-          const foreignAlias =
-            queryConfig.value.tables[foreignTableIndex].alias;
-
           // 根据关系类型确定JOIN类型
           let joinType = "INNER JOIN";
           if (relation.relationType === "one-to-one") {
@@ -1743,8 +1789,8 @@ export default {
           }
 
           autoJoins.push({
-            leftTable: primaryAlias,
-            rightTable: foreignAlias,
+            leftTable: relation.primaryTable,
+            rightTable: relation.foreignTable,
             leftColumn: relation.primaryColumn,
             rightColumn: relation.foreignColumn,
             joinType: joinType,
@@ -1768,6 +1814,19 @@ export default {
       saveTemplateDialogVisible.value = true;
     };
 
+    // 从条件中提取表并转换为后端格式
+    const extractTablesFromConditions = () => {
+      const involvedTables = new Set();
+      queryConfig.value.conditions.forEach((condition) => {
+        if (condition.table) {
+          involvedTables.add(condition.table);
+        }
+      });
+      return Array.from(involvedTables).map((tableName) => ({
+        name: tableName,
+      }));
+    };
+
     const saveTemplate = async () => {
       if (!templateForm.value.name) {
         ElMessage.warning("请输入模板名称");
@@ -1777,7 +1836,9 @@ export default {
       try {
         await axios.post("http://localhost:3000/api/query-templates", {
           ...templateForm.value,
-          ...queryConfig.value,
+          tables: extractTablesFromConditions(),
+          joins: queryConfig.value.joins || [],
+          conditions: queryConfig.value.conditions || [],
         });
         ElMessage.success("模板保存成功");
         saveTemplateDialogVisible.value = false;
@@ -1823,7 +1884,12 @@ export default {
       try {
         const response = await axios.post(
           "http://localhost:3000/api/export-query",
-          { ...queryConfig.value, format },
+          {
+            tables: extractTablesFromConditions(),
+            joins: queryConfig.value.joins || [],
+            conditions: queryConfig.value.conditions || [],
+            format,
+          },
           { responseType: "blob" }
         );
 
@@ -1914,9 +1980,9 @@ export default {
           foreignTable: relation.right_table,
           foreignColumn: relation.right_column,
           relationType: "one-to-many", // 默认关系类型
-          onUpdateAction: "no-action",
-          onDeleteAction: "no-action",
-          relationName: "",
+          onUpdateAction: relation.on_update_action || "no-action",
+          onDeleteAction: relation.on_delete_action || "no-action",
+          relationName: relation.relation_name || "",
         }));
       } catch (error) {
         console.error("获取关系失败:", error);
@@ -2011,6 +2077,43 @@ export default {
     const tableDetails = ref(null);
     const newData = ref({});
     const editingData = ref({});
+    const originalEditingData = ref({}); // 保存编辑前的原始数据
+
+    // 字段值域验证配置
+    const fieldValidationRules = {
+      // 性别字段：只能是 "男" 或 "女"
+      gender: {
+        allowedValues: ["男", "女"],
+        message: "性别字段只能是 '男' 或 '女'",
+      },
+      // 状态字段：只能是 "启用" 或 "禁用"
+      status: {
+        allowedValues: ["启用", "禁用"],
+        message: "状态字段只能是 '启用' 或 '禁用'",
+      },
+      // 可以添加更多字段验证规则
+    };
+
+    // 字段值域验证函数
+    const validateFieldValue = (fieldName, value) => {
+      // 将字段名转换为小写，以支持不同的大小写变体
+      const lowerFieldName = fieldName.toLowerCase();
+
+      // 检查是否有匹配的验证规则
+      for (const [ruleField, rule] of Object.entries(fieldValidationRules)) {
+        if (lowerFieldName.includes(ruleField.toLowerCase())) {
+          if (!rule.allowedValues.includes(value)) {
+            return {
+              valid: false,
+              message: rule.message,
+              allowedValues: rule.allowedValues,
+            };
+          }
+        }
+      }
+
+      return { valid: true };
+    };
 
     // 表管理方法
     const fetchTables = async () => {
@@ -2355,6 +2458,7 @@ export default {
 
     const editData = (row) => {
       editingData.value = { ...row };
+      originalEditingData.value = { ...row }; // 保存原始数据
       editDataDialogVisible.value = true;
     };
 
@@ -2365,12 +2469,87 @@ export default {
         const primaryKey = getPrimaryKey(currentTable.value);
         if (!primaryKey) {
           ElMessage.error("无法确定表的主键，更新操作失败");
+          updateLoading.value = false;
           return;
         }
 
-        // 使用主键值作为更新条件
+        // 检查主键字段是否被修改
+        const originalPrimaryKeyValue = originalEditingData.value[primaryKey];
+        const newPrimaryKeyValue = editingData.value[primaryKey];
+
+        if (originalPrimaryKeyValue !== newPrimaryKeyValue) {
+          // 主键值被修改，需要二次确认
+          const firstConfirm = await ElMessageBox.confirm(
+            `警告：您正在修改主键字段 "${primaryKey}" 的值！\n\n` +
+              `原值: ${originalPrimaryKeyValue}\n` +
+              `新值: ${newPrimaryKeyValue}\n\n` +
+              `修改主键可能导致以下问题：\n` +
+              `1. 破坏与其他表的关联关系\n` +
+              `2. 数据完整性受损\n` +
+              `3. 应用程序出错\n\n` +
+              `请确认是否继续此操作？`,
+            "主键修改警告",
+            {
+              confirmButtonText: "确定修改",
+              cancelButtonText: "取消",
+              type: "warning",
+            }
+          ).catch(() => false);
+
+          if (!firstConfirm) {
+            ElMessage.info("已取消主键修改操作");
+            updateLoading.value = false;
+            return;
+          }
+
+          // 二次确认
+          const secondConfirm = await ElMessageBox.confirm(
+            `这是最后一次确认！\n\n` +
+              `您确定要将主键 "${primaryKey}" 从 "${originalPrimaryKeyValue}" 修改为 "${newPrimaryKeyValue}" 吗？\n\n` +
+              `此操作一旦执行将无法撤销！`,
+            "二次确认 - 主键修改",
+            {
+              confirmButtonText: "确认修改",
+              cancelButtonText: "取消",
+              type: "error",
+            }
+          ).catch(() => false);
+
+          if (!secondConfirm) {
+            ElMessage.info("已取消主键修改操作");
+            updateLoading.value = false;
+            return;
+          }
+        }
+
+        // 验证每个字段的值
+        for (const [fieldName, value] of Object.entries(editingData.value)) {
+          // 跳过主键字段的值验证
+          if (fieldName === primaryKey) {
+            continue;
+          }
+
+          // 对每个字段进行值域验证
+          const fieldValidation = validateFieldValue(fieldName, value);
+          if (!fieldValidation.valid) {
+            ElMessageBox.alert(
+              `字段 "${fieldName}" 的值不符合要求。\n${
+                fieldValidation.message
+              }\n允许的值: ${fieldValidation.allowedValues.join(", ")}`,
+              "字段值验证失败",
+              {
+                confirmButtonText: "确定",
+                type: "error",
+              }
+            );
+            updateLoading.value = false;
+            return;
+          }
+        }
+
+        // 使用原始主键值作为更新条件
         await axios.put(
-          `http://localhost:3000/api/updateData/${currentTable.value}/${editingData.value[primaryKey]}`,
+          `http://localhost:3000/api/updateData/${currentTable.value}/${originalPrimaryKeyValue}`,
           editingData.value
         );
         ElMessage.success("数据更新成功！");
@@ -2401,14 +2580,41 @@ export default {
         }
 
         // 使用主键值作为删除条件
-        await axios.delete(
+        const response = await axios.delete(
           `http://localhost:3000/api/deleteData/${currentTable.value}/${row[primaryKey]}`
         );
-        ElMessage.success("数据删除成功！");
+
+        // 显示详细的操作结果
+        let message = response.data.message || "数据删除成功！";
+
+        // 如果有级联操作或设置NULL的操作，使用MessageBox显示详细信息
+        if (
+          (response.data.cascadeMessages &&
+            response.data.cascadeMessages.length > 0) ||
+          (response.data.setNullMessages &&
+            response.data.setNullMessages.length > 0)
+        ) {
+          await ElMessageBox.alert(message, "删除成功", {
+            confirmButtonText: "确定",
+            type: "success",
+          });
+        } else {
+          ElMessage.success(message);
+        }
+
         refreshTableData();
       } catch (error) {
         if (error !== "cancel") {
-          ElMessage.error("删除数据失败！");
+          // 显示详细的错误信息
+          const errorMessage =
+            error.response?.data?.details ||
+            error.response?.data?.error ||
+            "删除数据失败！";
+          await ElMessageBox.alert(errorMessage, "删除失败", {
+            confirmButtonText: "确定",
+            type: "error",
+            dangerouslyUseHTMLString: false,
+          });
         }
       }
     };
@@ -2533,6 +2739,9 @@ export default {
           leftColumn: newRelation.value.primaryColumn,
           rightColumn: newRelation.value.foreignColumn,
           joinType: "INNER JOIN", // 默认使用内连接
+          relationName: newRelation.value.relationName || "",
+          onUpdateAction: newRelation.value.onUpdateAction || "no-action",
+          onDeleteAction: newRelation.value.onDeleteAction || "no-action",
         });
 
         // 添加到本地关系列表
@@ -2611,6 +2820,7 @@ export default {
     // 跨表更新相关
     const updateConditions = ref([
       {
+        table: "",
         field: "",
         operator: "=",
         value: "",
@@ -2618,8 +2828,15 @@ export default {
     ]);
 
     const updateFieldForm = ref({
+      table: "",
       field: "",
       value: "",
+      operator: "",
+    });
+
+    // 跨表更新安全设置
+    const updateSettings = ref({
+      strictMode: false, // 默认关闭，允许未定义关系的跨表更新
     });
 
     const updateResult = ref(null);
@@ -2655,6 +2872,7 @@ export default {
     // 跨表更新方法
     const addUpdateCondition = () => {
       updateConditions.value.push({
+        table: "",
         field: "",
         operator: "=",
         value: "",
@@ -2667,16 +2885,57 @@ export default {
       }
     };
 
+    const resetCrossTableUpdate = () => {
+      // 重置更新条件
+      updateConditions.value = [
+        {
+          table: "",
+          field: "",
+          operator: "=",
+          value: "",
+        },
+      ];
+
+      // 重置更新字段表单
+      updateFieldForm.value = {
+        table: "",
+        field: "",
+        value: "",
+        operator: "",
+      };
+
+      // 清空更新结果
+      updateResult.value = null;
+      previewResult.value = null;
+
+      ElMessage.success("表单已重置");
+    };
+
     const executeCrossTableUpdate = async () => {
+      // 验证操作者
+      if (
+        !updateFieldForm.value.operator ||
+        updateFieldForm.value.operator.trim() === ""
+      ) {
+        ElMessage.error("请填写操作者姓名");
+        return;
+      }
+
       // 验证条件
-      if (updateConditions.value.some((c) => !c.field || !c.value)) {
-        ElMessage.warning("请填写完整的更新条件");
+      if (
+        updateConditions.value.some((c) => !c.table || !c.field || !c.value)
+      ) {
+        ElMessage.warning("请填写完整的更新条件（表、字段和值）");
         return;
       }
 
       // 验证更新字段
-      if (!updateFieldForm.value.field || updateFieldForm.value.value === "") {
-        ElMessage.warning("请指定要更新的字段和新值");
+      if (
+        !updateFieldForm.value.table ||
+        !updateFieldForm.value.field ||
+        updateFieldForm.value.value === ""
+      ) {
+        ElMessage.warning("请指定要更新的表、字段和新值");
         return;
       }
 
@@ -2696,25 +2955,56 @@ export default {
       }
 
       // 检查是否尝试更新主键
-      if (targetColumn.primaryKey) {
-        ElMessageBox.confirm(
-          `您正尝试更新主键字段 ${tableName}.${fieldName}，这可能会破坏数据完整性。确定要继续吗？`,
-          "警告",
+      // SQLite使用pk字段表示主键，pk > 0表示是主键
+      // 同时也检查 pk 字段是否存在
+      const isPrimaryKey = targetColumn.pk && targetColumn.pk > 0;
+
+      if (isPrimaryKey) {
+        // 第一次确认：主键修改警告
+        const firstConfirm = await ElMessageBox.confirm(
+          `警告：您正在尝试更新主键字段 ${tableName}.${fieldName}！\n\n` +
+            `修改主键可能导致以下问题：\n` +
+            `1. 破坏与其他表的关联关系\n` +
+            `2. 数据完整性受损\n` +
+            `3. 导致外键约束失败\n` +
+            `4. 应用程序可能出错\n\n` +
+            `请确认是否继续此操作？`,
+          "主键修改警告",
           {
-            confirmButtonText: "确定",
+            confirmButtonText: "确定修改",
             cancelButtonText: "取消",
             type: "warning",
           }
-        )
-          .then(() => {
-            // 用户确认继续，执行更新
-            performUpdate();
-          })
-          .catch(() => {
-            // 用户取消操作
-            return;
-          });
-        return;
+        ).catch(() => false);
+
+        if (!firstConfirm) {
+          ElMessage.info("已取消主键修改操作");
+          return;
+        }
+
+        // 第二次确认：强调风险
+        const secondConfirm = await ElMessageBox.confirm(
+          `这是最后一次确认！\n\n` +
+            `您确定要更新主键字段 ${tableName}.${fieldName} 为 "${updateFieldForm.value.value}" 吗？\n\n` +
+            `此操作一旦执行将无法撤销，可能会导致：\n` +
+            `• 与其他表的数据关联被破坏\n` +
+            `• 引用此主键的外键关系失效\n` +
+            `• 严重影响数据完整性\n\n` +
+            `请谨慎操作！`,
+          "二次确认 - 主键修改",
+          {
+            confirmButtonText: "确认修改",
+            cancelButtonText: "取消",
+            type: "error",
+          }
+        ).catch(() => false);
+
+        if (!secondConfirm) {
+          ElMessage.info("已取消主键修改操作");
+          return;
+        }
+
+        // 用户两次确认后，继续执行更新流程
       }
 
       // 验证字段类型是否匹配（简单验证）
@@ -2723,6 +3013,25 @@ export default {
         !/^\d+$/.test(updateFieldForm.value.value)
       ) {
         ElMessage.warning(`字段 ${fieldName} 是整数类型，但输入的值不是整数`);
+        return;
+      }
+
+      // 添加字段值域验证
+      const fieldValidation = validateFieldValue(
+        fieldName,
+        updateFieldForm.value.value
+      );
+      if (!fieldValidation.valid) {
+        ElMessageBox.alert(
+          `${
+            fieldValidation.message
+          }\n允许的值: ${fieldValidation.allowedValues.join(", ")}`,
+          "字段值验证失败",
+          {
+            confirmButtonText: "确定",
+            type: "error",
+          }
+        );
         return;
       }
 
@@ -2766,8 +3075,26 @@ export default {
           if (hasDefinedRelations) break;
         }
 
-        // 如果没有定义的关系，给出警告
+        // 如果没有定义的关系，根据设置决定是否允许操作
         if (!hasDefinedRelations) {
+          // 如果开启了严格模式，直接禁止操作
+          if (updateSettings.value.strictMode) {
+            ElMessageBox.alert(
+              `❌ 跨表更新被禁止！\n\n涉及的表（${Array.from(
+                tablesInConditions
+              ).join(
+                "、"
+              )}）之间没有明确定义关联关系。\n\n请在"关系管理"标签页中先定义表之间的关联关系，或关闭"禁止未定义关系的跨表更新"设置。`,
+              "跨表更新被禁止",
+              {
+                confirmButtonText: "我知道了",
+                type: "error",
+              }
+            );
+            return;
+          }
+
+          // 如果没有开启严格模式，给出警告提示
           const confirmResult = await ElMessageBox.confirm(
             "您正在进行跨表更新操作，但涉及的表之间没有明确定义关系。系统将尝试自动推断关联关系，但这可能导致更新了错误的记录。建议您先在关系管理中定义表之间的关系。是否继续？",
             "跨表更新警告",
@@ -2797,6 +3124,7 @@ export default {
             conditions: updateConditions.value,
             updateField: updateFieldForm.value.field,
             updateValue: updateFieldForm.value.value,
+            operator: updateFieldForm.value.operator,
           }
         );
 
@@ -2816,14 +3144,16 @@ export default {
 
     const previewUpdate = async () => {
       // 验证条件
-      if (updateConditions.value.some((c) => !c.field || !c.value)) {
-        ElMessage.warning("请填写完整的更新条件");
+      if (
+        updateConditions.value.some((c) => !c.table || !c.field || !c.value)
+      ) {
+        ElMessage.warning("请填写完整的更新条件（表、字段和值）");
         return;
       }
 
       // 验证更新字段
-      if (!updateFieldForm.value.field) {
-        ElMessage.warning("请指定要更新的字段");
+      if (!updateFieldForm.value.table || !updateFieldForm.value.field) {
+        ElMessage.warning("请指定要更新的表和字段");
         return;
       }
 
@@ -3302,11 +3632,48 @@ export default {
 
       fetchTables();
       fetchUpdateHistory(); // 加载更新历史
+
+      // 吸顶效果 - 滚动监听（用于动态样式调整）
+      let ticking = false;
+      const handleScroll = () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const tabsContainer = document.querySelector(".el-tabs");
+            const scrollTop =
+              window.pageYOffset || document.documentElement.scrollTop;
+
+            if (tabsContainer) {
+              if (scrollTop > 50) {
+                // 滚动超过50px时，增强吸顶效果
+                tabsContainer.style.boxShadow =
+                  "0 4px 16px rgba(0, 0, 0, 0.12)";
+              } else {
+                // 回到顶部时，恢复原始样式
+                tabsContainer.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.05)";
+              }
+            }
+            ticking = false;
+          });
+          ticking = true;
+        }
+      };
+
+      // 添加滚动监听
+      window.addEventListener("scroll", handleScroll, { passive: true });
+
+      // 存储清理函数
+      window.tabsScrollHandler = handleScroll;
     });
 
     // 组件卸载前清理 ECharts 实例
     onBeforeUnmount(() => {
       cleanupPieChart();
+
+      // 清理滚动监听器
+      if (window.tabsScrollHandler) {
+        window.removeEventListener("scroll", window.tabsScrollHandler);
+        delete window.tabsScrollHandler;
+      }
     });
 
     // 组件激活时（从其他路由返回）
@@ -3347,13 +3714,11 @@ export default {
       // 原有的方法...
 
       // 高级查询方法
-      onTableChange,
       getTableColumns,
-      addTable,
-      removeTable,
       addCondition,
       removeCondition,
       executeQuery,
+      resetAdvancedQuery,
       generateAutoJoins,
       getResultColumns,
       saveAsTemplate,
@@ -3406,6 +3771,7 @@ export default {
       tableDetails,
       newData,
       editingData,
+      originalEditingData,
       // 方法
       fetchTables,
       createTable,
@@ -3439,6 +3805,7 @@ export default {
       // 跨表更新相关
       updateConditions,
       updateFieldForm,
+      updateSettings,
       updateResult,
       updateLoading,
       addUpdateCondition,
@@ -3446,6 +3813,7 @@ export default {
       executeCrossTableUpdate,
       performUpdate,
       previewUpdate,
+      resetCrossTableUpdate,
       previewResult,
       previewDialogVisible,
       activeSqlTab,
@@ -3476,6 +3844,10 @@ export default {
       onStatisticsTableChange,
       fetchStatistics,
       exportStatistics,
+
+      // 字段值域验证相关
+      fieldValidationRules,
+      validateFieldValue,
     };
   },
 };
@@ -3486,34 +3858,146 @@ export default {
   padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
-  overflow: visible !important;
+  min-height: 100vh;
+  overflow: visible;
+}
+
+/* 标签页样式美化 - 简洁专业风格，支持吸顶效果 */
+:deep(.el-tabs) {
+  border-radius: 8px;
+  overflow: visible;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  border: 1px solid #e4e7ed;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.el-tabs__header) {
+  margin: 0;
+  background: #fafbfc;
+  border-bottom: 1px solid #e4e7ed;
+  padding: 8px 12px 0 12px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  background: rgba(250, 251, 252, 0.95);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px 8px 0 0;
+}
+
+:deep(.el-tabs__nav-wrap) {
+  background: transparent;
+}
+
+:deep(.el-tabs__item) {
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #606266;
+  border-radius: 6px 6px 0 0;
+  margin-right: 4px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  position: relative;
+  cursor: pointer;
+}
+
+:deep(.el-tabs__item:hover) {
+  color: #303133;
+  background-color: #f5f7fa;
+  transform: translateY(-1px);
+}
+
+:deep(.el-tabs__item.is-active) {
+  color: #409eff;
+  background: #ffffff;
+  font-weight: 600;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15);
+}
+
+:deep(.el-tabs__item.is-active::after) {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background: #409eff;
+  border-radius: 3px 3px 0 0;
+  box-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
+}
+
+:deep(.el-tabs__content) {
+  padding: 20px;
+  background: #ffffff;
+  overflow: visible;
+  min-height: calc(100vh - 40px);
+  border-radius: 0 0 8px 8px;
+  border: 1px solid #e4e7ed;
+  border-top: none;
+  margin-top: -1px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .el-card {
-  max-width: 1200px;
+  max-width: 1400px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  border: 1px solid #e4e7ed;
+}
+
+.el-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+:deep(.el-card__header) {
+  background: #fafbfc;
+  border-bottom: 1px solid #e4e7ed;
+  padding: 16px 20px;
+  font-weight: 600;
+  color: #303133;
 }
 
 .tab-content {
   padding: 0;
+  overflow: visible;
+  min-height: 100%;
 }
 
 .action-buttons {
-  width: 1200px;
+  width: 1400px;
   clear: both !important;
   padding-top: 20px;
   padding-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 按钮样式优化 - 简洁风格 */
+:deep(.el-button) {
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+:deep(.el-button:hover) {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.el-button.is-loading) {
+  box-shadow: none;
 }
 
 .query-section {
   margin-bottom: 20px;
   clear: both;
-}
-
-.section-title {
-  margin: 0 0 15px 0;
-  font-size: 18px;
-  font-weight: bold;
-  color: #409eff;
 }
 
 .card-header {
@@ -3570,6 +4054,21 @@ export default {
 
 .query-section .subsection-card {
   margin-bottom: 20px;
+}
+
+/* 子卡片样式 */
+.subsection-card {
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.subsection-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+:deep(.subsection-card .el-card__header) {
+  background: #fafbfc;
+  border-bottom: 1px solid #e4e7ed;
 }
 
 .query-section .el-card__header {
@@ -3805,19 +4304,6 @@ export default {
 }
 
 /* 修改详情表格样式 - 优化版 */
-.comparison-header {
-  margin-bottom: 20px;
-  padding: 12px 15px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e1f5fe 100%);
-  border-radius: 8px;
-  border-left: 4px solid #409eff;
-}
-
-.comparison-header h4 {
-  margin: 0;
-  color: #409eff;
-  font-size: 16px;
-}
 
 .comparison-table {
   width: 100%;
@@ -3923,15 +4409,6 @@ export default {
 /* 基本表格样式优化 */
 :deep(.el-table) {
   table-layout: fixed;
-}
-
-:deep(.el-table__body-wrapper) {
-  .database-manager .el-form-item.init {
-    padding-left: 220px !important;
-    padding-right: 220px !important;
-  }
-
-  overflow-x: auto;
 }
 
 /* 预览对话框样式 - 修复ResizeObserver错误 */
@@ -4101,5 +4578,53 @@ export default {
 
 .database-manager * {
   box-sizing: border-box;
+}
+
+/* 确保整个页面布局正常 */
+html,
+body {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* 确保卡片内容不被裁剪 */
+.section-card,
+.subsection-card {
+  overflow: visible !important;
+}
+
+/* 吸顶效果优化 */
+:deep(.el-tabs__nav-scroll) {
+  overflow: visible !important;
+}
+
+:deep(.el-tabs__nav) {
+  overflow: visible !important;
+}
+
+/* 确保sticky定位正常工作 */
+:deep(.el-tabs__header) {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+}
+
+/* 调试样式 - 可以在开发者工具中查看效果 */
+.tabs-sticky-debug {
+  position: sticky;
+  top: 0;
+  background: yellow;
+  padding: 10px;
+  z-index: 9999;
+}
+
+/* 表格容器滚动优化 */
+.el-table {
+  overflow: visible !important;
+}
+
+.el-table__body-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
 }
 </style>

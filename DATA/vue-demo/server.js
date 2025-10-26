@@ -46,7 +46,10 @@ function saveTableRelation(
   rightTable,
   leftColumn,
   rightColumn,
-  joinType = "INNER JOIN"
+  joinType = "INNER JOIN",
+  relationName = "",
+  onUpdateAction = "no-action",
+  onDeleteAction = "no-action"
 ) {
   return new Promise((resolve, reject) => {
     try {
@@ -59,7 +62,11 @@ function saveTableRelation(
       left_column TEXT NOT NULL,
       right_column TEXT NOT NULL,
       join_type TEXT DEFAULT 'INNER JOIN',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      relation_name TEXT,
+      on_update_action TEXT DEFAULT 'no-action',
+      on_delete_action TEXT DEFAULT 'no-action',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(left_table, right_table, left_column, right_column)
     )`,
         (err) => {
           if (err) {
@@ -70,25 +77,81 @@ function saveTableRelation(
         }
       );
 
-      const sql = `
-      INSERT OR REPLACE INTO table_relations 
-      (left_table, right_table, left_column, right_column, join_type) 
-      VALUES (?, ?, ?, ?, ?)
-    `;
+      // 先检查是否已存在相同的关系
+      const checkSql = `
+        SELECT id FROM table_relations 
+        WHERE left_table = ? AND right_table = ? 
+        AND left_column = ? AND right_column = ?
+      `;
 
-      db.run(
-        sql,
-        [leftTable, rightTable, leftColumn, rightColumn, joinType],
-        function (err) {
+      db.get(
+        checkSql,
+        [leftTable, rightTable, leftColumn, rightColumn],
+        (err, row) => {
           if (err) {
-            console.error("保存表关联关系失败:", err.message);
+            console.error("检查关系是否存在失败:", err.message);
             reject(err);
             return;
           }
-          console.log(
-            `成功保存表关联关系: ${leftTable}.${leftColumn} = ${rightTable}.${rightColumn}`
-          );
-          resolve(true);
+
+          if (row) {
+            // 更新现有关系
+            const updateSql = `
+            UPDATE table_relations 
+            SET join_type = ?, relation_name = ?, on_update_action = ?, on_delete_action = ?
+            WHERE id = ?
+          `;
+            db.run(
+              updateSql,
+              [joinType, relationName, onUpdateAction, onDeleteAction, row.id],
+              function (err) {
+                if (err) {
+                  console.error("更新表关联关系失败:", err.message);
+                  reject(err);
+                  return;
+                }
+                console.log(
+                  `成功更新表关联关系: ${leftTable}.${leftColumn} = ${rightTable}.${rightColumn}, 关系名称: ${
+                    relationName || "未命名"
+                  }`
+                );
+                resolve(true);
+              }
+            );
+          } else {
+            // 插入新关系
+            const insertSql = `
+            INSERT INTO table_relations 
+            (left_table, right_table, left_column, right_column, join_type, relation_name, on_update_action, on_delete_action) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          `;
+            db.run(
+              insertSql,
+              [
+                leftTable,
+                rightTable,
+                leftColumn,
+                rightColumn,
+                joinType,
+                relationName,
+                onUpdateAction,
+                onDeleteAction,
+              ],
+              function (err) {
+                if (err) {
+                  console.error("保存表关联关系失败:", err.message);
+                  reject(err);
+                  return;
+                }
+                console.log(
+                  `成功保存表关联关系: ${leftTable}.${leftColumn} = ${rightTable}.${rightColumn}, 关系名称: ${
+                    relationName || "未命名"
+                  }`
+                );
+                resolve(true);
+              }
+            );
+          }
         }
       );
     } catch (error) {
@@ -139,7 +202,11 @@ function getAllTableRelations() {
         left_column TEXT NOT NULL,
         right_column TEXT NOT NULL,
         join_type TEXT DEFAULT 'INNER JOIN',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        relation_name TEXT,
+        on_update_action TEXT DEFAULT 'no-action',
+        on_delete_action TEXT DEFAULT 'no-action',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(left_table, right_table, left_column, right_column)
       )`,
         (err) => {
           if (err) {
@@ -147,6 +214,36 @@ function getAllTableRelations() {
             reject(err);
             return;
           }
+
+          // 添加 relation_name 字段（如果不存在）
+          db.run(
+            `ALTER TABLE table_relations ADD COLUMN relation_name TEXT`,
+            (err) => {
+              if (err && !err.message.includes("duplicate column name")) {
+                console.error("添加relation_name字段失败:", err.message);
+              }
+            }
+          );
+
+          // 添加 on_update_action 字段（如果不存在）
+          db.run(
+            `ALTER TABLE table_relations ADD COLUMN on_update_action TEXT DEFAULT 'no-action'`,
+            (err) => {
+              if (err && !err.message.includes("duplicate column name")) {
+                console.error("添加on_update_action字段失败:", err.message);
+              }
+            }
+          );
+
+          // 添加 on_delete_action 字段（如果不存在）
+          db.run(
+            `ALTER TABLE table_relations ADD COLUMN on_delete_action TEXT DEFAULT 'no-action'`,
+            (err) => {
+              if (err && !err.message.includes("duplicate column name")) {
+                console.error("添加on_delete_action字段失败:", err.message);
+              }
+            }
+          );
 
           // 查询所有关联关系
           db.all(
@@ -322,19 +419,71 @@ app.put("/api/updateData/:tableName/:id", (req, res) => {
 // 删除数据接口
 app.delete("/api/deleteData/:tableName/:id", (req, res) => {
   const { tableName, id } = req.params;
-  const sql = `DELETE FROM ${tableName} WHERE rowid = ?`;
 
-  db.run(sql, [id], function (err) {
+  // 先获取要删除的记录数据
+  const getRecordSql = `SELECT * FROM ${tableName} WHERE rowid = ?`;
+  db.get(getRecordSql, [id], (err, record) => {
     if (err) {
-      console.error(err.message);
       return res
         .status(500)
-        .json({ error: "删除数据失败", details: err.message });
+        .json({ error: "获取记录失败", details: err.message });
     }
-    res.json({
-      message: "数据删除成功",
-      changes: this.changes,
-    });
+
+    if (!record) {
+      return res.status(404).json({ error: "记录不存在" });
+    }
+
+    // 检查并应用删除约束
+    checkAndApplyDeleteConstraints(
+      tableName,
+      id,
+      record,
+      (constraintResult) => {
+        if (!constraintResult.canDelete) {
+          return res.status(400).json({
+            error: constraintResult.message,
+            details: constraintResult.message,
+          });
+        }
+
+        // 执行删除
+        const sql = `DELETE FROM ${tableName} WHERE rowid = ?`;
+        db.run(sql, [id], function (err) {
+          if (err) {
+            console.error(err.message);
+            return res
+              .status(500)
+              .json({ error: "删除数据失败", details: err.message });
+          }
+
+          // 构建成功消息
+          let successMessage = "数据删除成功";
+          if (
+            constraintResult.cascadeMessages &&
+            constraintResult.cascadeMessages.length > 0
+          ) {
+            successMessage +=
+              "\n\n📋 级联操作：\n" +
+              constraintResult.cascadeMessages.join("\n");
+          }
+          if (
+            constraintResult.setNullMessages &&
+            constraintResult.setNullMessages.length > 0
+          ) {
+            successMessage +=
+              "\n\n📋 字段清理：\n" +
+              constraintResult.setNullMessages.join("\n");
+          }
+
+          res.json({
+            message: successMessage,
+            changes: this.changes,
+            cascadeMessages: constraintResult.cascadeMessages || [],
+            setNullMessages: constraintResult.setNullMessages || [],
+          });
+        });
+      }
+    );
   });
 });
 
@@ -693,7 +842,7 @@ app.post("/api/preview-cross-table-update", (req, res) => {
 
 // 添加跨表更新API
 app.post("/api/cross-table-update", (req, res) => {
-  const { conditions, updateField, updateValue } = req.body;
+  const { conditions, updateField, updateValue, operator } = req.body;
 
   if (!conditions || conditions.length === 0) {
     return res.status(400).json({ error: "更新条件不能为空" });
@@ -701,6 +850,10 @@ app.post("/api/cross-table-update", (req, res) => {
 
   if (!updateField || updateValue === undefined) {
     return res.status(400).json({ error: "更新字段和值不能为空" });
+  }
+
+  if (!operator || operator.trim() === "") {
+    return res.status(400).json({ error: "操作者不能为空" });
   }
 
   // 构建查询SQL，先找出需要更新的记录
@@ -797,7 +950,8 @@ app.post("/api/cross-table-update", (req, res) => {
           updateField,
           updateValue,
           this.changes,
-          beforeValues
+          beforeValues,
+          operator
         );
 
         // 直接使用本地时间（假设服务器已设置为北京时间）
@@ -816,6 +970,7 @@ app.post("/api/cross-table-update", (req, res) => {
           matchedCount: recordCount,
           sql: updateSQL,
           timestamp: timestamp,
+          operator: operator,
         });
       });
     });
@@ -828,7 +983,7 @@ app.get("/api/update-history", (req, res) => {
 
   // 直接使用北京时间格式查询
   let sql =
-    "SELECT id, conditions, update_info, update_count, timestamp, before_values FROM update_history";
+    "SELECT id, conditions, update_info, update_count, timestamp, before_values, operator FROM update_history";
   const params = [];
 
   if (startDate && endDate) {
@@ -1015,6 +1170,271 @@ function parseUpdateField(updateField) {
   };
 }
 
+// 检查并应用删除约束
+function checkAndApplyDeleteConstraints(
+  tableName,
+  recordId,
+  recordData,
+  callback
+) {
+  // 获取所有涉及该表的关系
+  const sql = `
+    SELECT * FROM table_relations 
+    WHERE left_table = ? OR right_table = ?
+  `;
+
+  db.all(sql, [tableName, tableName], (err, relations) => {
+    if (err) {
+      console.error("查询关系失败:", err.message);
+      callback({ canDelete: true }); // 出错时允许删除
+      return;
+    }
+
+    if (relations.length === 0) {
+      callback({ canDelete: true });
+      return;
+    }
+
+    let processedCount = 0;
+    let hasError = false;
+    let errorMessage = "";
+    let cascadeMessages = []; // 记录级联操作信息
+    let setNullMessages = []; // 记录set-null操作信息
+
+    for (const relation of relations) {
+      let targetTable = "";
+      let targetColumn = "";
+      let sourceColumn = "";
+
+      // 确定这是主表还是从表
+      if (relation.left_table === tableName) {
+        // 这是主表，查找从表中引用它的记录
+        targetTable = relation.right_table;
+        targetColumn = relation.right_column;
+        sourceColumn = relation.left_column;
+      } else {
+        // 这是从表，查找主表中引用它的记录
+        targetTable = relation.left_table;
+        targetColumn = relation.left_column;
+        sourceColumn = relation.right_column;
+      }
+
+      // 获取源记录的值
+      const sourceValue = recordData[sourceColumn];
+
+      if (sourceValue === undefined || sourceValue === null) {
+        processedCount++;
+        if (processedCount === relations.length && !hasError) {
+          callback({
+            canDelete: true,
+            cascadeMessages: cascadeMessages,
+            setNullMessages: setNullMessages,
+          });
+        }
+        continue;
+      }
+
+      // 查询有多少记录引用了这条记录
+      const checkSql = `SELECT COUNT(*) as count FROM ${targetTable} WHERE ${targetColumn} = ?`;
+
+      db.get(checkSql, [sourceValue], (err, result) => {
+        if (err) {
+          console.error("检查引用失败:", err.message);
+          processedCount++;
+          if (processedCount === relations.length && !hasError) {
+            callback({
+              canDelete: true,
+              cascadeMessages: cascadeMessages,
+              setNullMessages: setNullMessages,
+            });
+          }
+          return;
+        }
+
+        const referenceCount = result.count;
+
+        if (referenceCount > 0) {
+          // 根据约束类型处理
+          if (relation.on_delete_action === "restrict") {
+            hasError = true;
+            errorMessage = `❌ 无法删除此记录！\n\n原因：表 "${targetTable}" 中有 ${referenceCount} 条记录引用了这条记录（通过字段 "${targetColumn}" 引用值 "${sourceValue}"）\n\n删除约束设置为"限制删除"，不允许删除被引用的记录。\n\n解决方案：\n1. 先删除或修改这些引用记录\n2. 或将关系的删除约束改为"级联删除"或"设为NULL"`;
+            callback({ canDelete: false, message: errorMessage });
+            return;
+          } else if (relation.on_delete_action === "cascade") {
+            // 级联删除：先删除引用的记录
+            const deleteReferencedSql = `DELETE FROM ${targetTable} WHERE ${targetColumn} = ?`;
+            db.run(deleteReferencedSql, [sourceValue], (err) => {
+              if (err) {
+                console.error("级联删除失败:", err.message);
+                hasError = true;
+                errorMessage = `级联删除失败: ${err.message}`;
+                callback({ canDelete: false, message: errorMessage });
+                return;
+              }
+              console.log(
+                `级联删除了 ${targetTable} 表中 ${referenceCount} 条记录`
+              );
+              cascadeMessages.push(
+                `已自动删除表 "${targetTable}" 中的 ${referenceCount} 条关联记录`
+              );
+              processedCount++;
+              if (processedCount === relations.length && !hasError) {
+                callback({
+                  canDelete: true,
+                  cascadeMessages: cascadeMessages,
+                  setNullMessages: setNullMessages,
+                });
+              }
+            });
+          } else if (relation.on_delete_action === "set-null") {
+            // 设为NULL
+            const setNullSql = `UPDATE ${targetTable} SET ${targetColumn} = NULL WHERE ${targetColumn} = ?`;
+            db.run(setNullSql, [sourceValue], (err) => {
+              if (err) {
+                console.error("设为NULL失败:", err.message);
+              } else {
+                console.log(
+                  `将 ${targetTable}.${targetColumn} 中的 ${referenceCount} 条记录设为NULL`
+                );
+                setNullMessages.push(
+                  `已将表 "${targetTable}" 中 ${referenceCount} 条记录的字段 "${targetColumn}" 设为NULL`
+                );
+              }
+              processedCount++;
+              if (processedCount === relations.length && !hasError) {
+                callback({
+                  canDelete: true,
+                  cascadeMessages: cascadeMessages,
+                  setNullMessages: setNullMessages,
+                });
+              }
+            });
+          } else {
+            // no-action 或其他
+            processedCount++;
+            if (processedCount === relations.length && !hasError) {
+              callback({
+                canDelete: true,
+                cascadeMessages: cascadeMessages,
+                setNullMessages: setNullMessages,
+              });
+            }
+          }
+        } else {
+          processedCount++;
+          if (processedCount === relations.length && !hasError) {
+            callback({
+              canDelete: true,
+              cascadeMessages: cascadeMessages,
+              setNullMessages: setNullMessages,
+            });
+          }
+        }
+      });
+    }
+  });
+}
+
+// 检查并应用更新约束
+async function checkAndApplyUpdateConstraints(
+  tableName,
+  columnName,
+  oldValue,
+  newValue
+) {
+  return new Promise((resolve, reject) => {
+    // 获取所有涉及该表的关系
+    const sql = `
+      SELECT * FROM table_relations 
+      WHERE (left_table = ? AND left_column = ?) OR (right_table = ? AND right_column = ?)
+    `;
+
+    db.all(
+      sql,
+      [tableName, columnName, tableName, columnName],
+      async (err, relations) => {
+        if (err) {
+          console.error("查询关系失败:", err.message);
+          resolve({ canUpdate: true }); // 出错时允许更新
+          return;
+        }
+
+        for (const relation of relations) {
+          let targetTable = "";
+          let targetColumn = "";
+
+          // 确定这是主表还是从表
+          if (
+            relation.left_table === tableName &&
+            relation.left_column === columnName
+          ) {
+            // 这是主表的主键
+            targetTable = relation.right_table;
+            targetColumn = relation.right_column;
+          } else {
+            // 这是从表的外键
+            targetTable = relation.left_table;
+            targetColumn = relation.left_column;
+          }
+
+          // 查询有多少记录引用了旧值
+          const checkSql = `SELECT COUNT(*) as count FROM ${targetTable} WHERE ${targetColumn} = ?`;
+
+          db.get(checkSql, [oldValue], (err, result) => {
+            if (err) {
+              console.error("检查引用失败:", err.message);
+              return;
+            }
+
+            const referenceCount = result.count;
+
+            if (referenceCount > 0) {
+              // 根据约束类型处理
+              if (relation.on_update_action === "restrict") {
+                resolve({
+                  canUpdate: false,
+                  message: `无法更新：表 ${targetTable} 中有 ${referenceCount} 条记录引用了此值，更新约束为"限制更新"`,
+                });
+                return;
+              } else if (relation.on_update_action === "cascade") {
+                // 级联更新：更新所有引用的记录
+                const cascadeUpdateSql = `UPDATE ${targetTable} SET ${targetColumn} = ? WHERE ${targetColumn} = ?`;
+                db.run(cascadeUpdateSql, [newValue, oldValue], (err) => {
+                  if (err) {
+                    console.error("级联更新失败:", err.message);
+                    resolve({
+                      canUpdate: false,
+                      message: `级联更新失败: ${err.message}`,
+                    });
+                    return;
+                  }
+                  console.log(
+                    `级联更新了 ${targetTable} 表中 ${referenceCount} 条记录`
+                  );
+                });
+              } else if (relation.on_update_action === "set-null") {
+                // 设为NULL
+                const setNullSql = `UPDATE ${targetTable} SET ${targetColumn} = NULL WHERE ${targetColumn} = ?`;
+                db.run(setNullSql, [oldValue], (err) => {
+                  if (err) {
+                    console.error("设为NULL失败:", err.message);
+                  } else {
+                    console.log(
+                      `将 ${targetTable}.${targetColumn} 中的 ${referenceCount} 条记录设为NULL`
+                    );
+                  }
+                });
+              }
+            }
+          });
+        }
+
+        resolve({ canUpdate: true });
+      }
+    );
+  });
+}
+
 function extractTablesFromConditions(conditions) {
   const tables = new Set();
   conditions.forEach((condition) => {
@@ -1174,7 +1594,8 @@ function recordUpdateHistoryWithBeforeValues(
   updateField,
   updateValue,
   count,
-  beforeValues
+  beforeValues,
+  operator
 ) {
   // 直接使用本地时间（假设服务器已设置为北京时间）
   const beijingTime = new Date();
@@ -1187,8 +1608,8 @@ function recordUpdateHistoryWithBeforeValues(
   const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
   const sql = `
-    INSERT INTO update_history (conditions, update_info, update_count, timestamp, before_values)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO update_history (conditions, update_info, update_count, timestamp, before_values, operator)
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
 
   db.run(
@@ -1199,6 +1620,7 @@ function recordUpdateHistoryWithBeforeValues(
       count,
       timestamp,
       JSON.stringify(beforeValues),
+      operator || "未知",
     ],
     (err) => {
       if (err) {
@@ -1206,7 +1628,7 @@ function recordUpdateHistoryWithBeforeValues(
       } else {
         console.log(`执行时间: ${timestamp}`);
         console.log(
-          `成功记录更新历史: 字段=${updateField}, 新值=${updateValue}, 影响记录数=${count}, 修改前数据=${beforeValues.length}条`
+          `成功记录更新历史: 字段=${updateField}, 新值=${updateValue}, 影响记录数=${count}, 修改前数据=${beforeValues.length}条, 操作者=${operator}`
         );
       }
     }
@@ -1304,7 +1726,8 @@ db.run(
     update_info TEXT NOT NULL,
     update_count INTEGER NOT NULL,
     timestamp TEXT NOT NULL,
-    before_values TEXT
+    before_values TEXT,
+    operator TEXT
   )
 `,
   (err) => {
@@ -1320,6 +1743,13 @@ db.run(
 db.run(`ALTER TABLE update_history ADD COLUMN before_values TEXT`, (err) => {
   if (err && !err.message.includes("duplicate column name")) {
     console.error("添加before_values字段失败:", err.message);
+  }
+});
+
+// 添加operator字段（如果不存在）
+db.run(`ALTER TABLE update_history ADD COLUMN operator TEXT`, (err) => {
+  if (err && !err.message.includes("duplicate column name")) {
+    console.error("添加operator字段失败:", err.message);
   }
 });
 
@@ -1340,7 +1770,16 @@ app.get("/api/table-relations", async (req, res) => {
 
 // 添加表关联关系
 app.post("/api/table-relations", async (req, res) => {
-  const { leftTable, rightTable, leftColumn, rightColumn, joinType } = req.body;
+  const {
+    leftTable,
+    rightTable,
+    leftColumn,
+    rightColumn,
+    joinType,
+    relationName,
+    onUpdateAction,
+    onDeleteAction,
+  } = req.body;
 
   if (!leftTable || !rightTable || !leftColumn || !rightColumn) {
     return res.status(400).json({ error: "表名和字段名不能为空" });
@@ -1352,7 +1791,10 @@ app.post("/api/table-relations", async (req, res) => {
       rightTable,
       leftColumn,
       rightColumn,
-      joinType
+      joinType,
+      relationName,
+      onUpdateAction || "no-action",
+      onDeleteAction || "no-action"
     );
     res.json({ success: true, message: "表关联关系保存成功" });
   } catch (error) {
