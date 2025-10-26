@@ -804,68 +804,54 @@
               <el-form :model="statisticsForm" label-width="120px">
                 <el-row :gutter="20">
                   <el-col :span="8">
-                    <el-form-item label="统计类型">
+                    <el-form-item label="选择表格">
                       <el-select
-                        v-model="statisticsForm.type"
-                        placeholder="选择统计类型"
+                        v-model="statisticsForm.tableName"
+                        placeholder="请选择表格"
+                        @change="onStatisticsTableChange"
                         style="width: 100%"
                       >
                         <el-option
-                          label="就诊量前5的科室"
-                          value="top-departments"
-                        ></el-option>
-                        <el-option
-                          label="就诊量前5的医生"
-                          value="top-doctors"
-                        ></el-option>
-                        <el-option
-                          label="就诊趋势"
-                          value="visit-trend"
+                          v-for="table in tables"
+                          :key="table.name"
+                          :label="table.name"
+                          :value="table.name"
                         ></el-option>
                       </el-select>
                     </el-form-item>
                   </el-col>
                   <el-col :span="8">
-                    <el-form-item label="开始日期">
-                      <el-date-picker
-                        v-model="statisticsForm.startDate"
-                        type="datetime"
-                        placeholder="选择开始日期"
+                    <el-form-item label="选择字段">
+                      <el-select
+                        v-model="statisticsForm.fieldName"
+                        placeholder="请选择要统计的字段"
                         style="width: 100%"
-                      />
+                        :disabled="!statisticsForm.tableName"
+                      >
+                        <el-option
+                          v-for="field in statisticsTableFields"
+                          :key="field.name"
+                          :label="field.name"
+                          :value="field.name"
+                        ></el-option>
+                      </el-select>
                     </el-form-item>
                   </el-col>
                   <el-col :span="8">
-                    <el-form-item label="结束日期">
-                      <el-date-picker
-                        v-model="statisticsForm.endDate"
-                        type="datetime"
-                        placeholder="选择结束日期"
-                        style="width: 100%"
-                      />
+                    <el-form-item>
+                      <el-button
+                        @click="fetchStatistics"
+                        type="primary"
+                        :loading="statisticsLoading"
+                        :disabled="
+                          !statisticsForm.tableName || !statisticsForm.fieldName
+                        "
+                      >
+                        生成统计
+                      </el-button>
                     </el-form-item>
                   </el-col>
                 </el-row>
-                <el-form-item>
-                  <el-button
-                    @click="fetchStatistics"
-                    type="primary"
-                    :loading="statisticsLoading"
-                  >
-                    生成统计
-                  </el-button>
-                  <el-button
-                    @click="exportStatistics"
-                    type="success"
-                    :disabled="
-                      !statisticsData ||
-                      !statisticsData.data ||
-                      !statisticsData.data.length
-                    "
-                  >
-                    导出结果
-                  </el-button>
-                </el-form-item>
               </el-form>
             </el-card>
 
@@ -879,61 +865,35 @@
               class="subsection-card"
             >
               <template #header>
-                <span>统计结果</span>
+                <span
+                  >统计结果 - {{ statisticsForm.tableName }}.{{
+                    statisticsForm.fieldName
+                  }}</span
+                >
               </template>
 
-              <!-- 排名统计 -->
-              <div
-                v-if="
-                  statisticsForm.type === 'top-departments' ||
-                  statisticsForm.type === 'top-doctors'
-                "
-              >
-                <el-table
-                  :data="
-                    statisticsData && statisticsData.data
-                      ? statisticsData.data
-                      : []
-                  "
-                  border
-                  style="width: 100%"
-                >
-                  <el-table-column
-                    :label="
-                      statisticsForm.type === 'top-departments'
-                        ? '科室'
-                        : '医生'
-                    "
-                    prop="name"
-                  ></el-table-column>
-                  <el-table-column
-                    label="就诊量"
-                    prop="count"
-                  ></el-table-column>
-                </el-table>
+              <!-- 饼状图 -->
+              <div class="chart-container">
+                <div ref="pieChartRef" style="width: 100%; height: 500px"></div>
               </div>
 
-              <!-- 趋势统计 -->
-              <div v-else-if="statisticsForm.type === 'visit-trend'">
-                <el-table
-                  :data="
-                    statisticsData && statisticsData.data
-                      ? statisticsData.data
-                      : []
-                  "
-                  border
-                  style="width: 100%"
-                >
-                  <el-table-column
-                    label="时间段"
-                    prop="period"
-                  ></el-table-column>
-                  <el-table-column
-                    label="就诊量"
-                    prop="count"
-                  ></el-table-column>
-                </el-table>
-              </div>
+              <!-- 数据表格 -->
+              <el-table
+                :data="statisticsData.data"
+                border
+                style="width: 100%; margin-top: 20px"
+              >
+                <el-table-column
+                  :label="statisticsForm.fieldName"
+                  prop="value"
+                ></el-table-column>
+                <el-table-column label="数量" prop="count"></el-table-column>
+                <el-table-column label="占比" prop="percentage">
+                  <template #default="{ row }">
+                    {{ row.percentage }}%
+                  </template>
+                </el-table-column>
+              </el-table>
             </el-card>
           </div>
         </div>
@@ -1573,9 +1533,18 @@
 
 <script>
 import axios from "axios";
-import { ref, onMounted, nextTick } from "vue";
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  onActivated,
+  onDeactivated,
+  nextTick,
+  watch,
+} from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Edit, Close, Check, Document } from "@element-plus/icons-vue";
+import * as echarts from "echarts";
 
 export default {
   name: "DatabaseManager",
@@ -2673,13 +2642,15 @@ export default {
 
     // 统计分析相关
     const statisticsForm = ref({
-      type: "top-departments",
-      startDate: null,
-      endDate: null,
+      tableName: "",
+      fieldName: "",
     });
 
     const statisticsData = ref(null);
     const statisticsLoading = ref(false);
+    const statisticsTableFields = ref([]);
+    const pieChartRef = ref(null);
+    let pieChartInstance = null;
 
     // 跨表更新方法
     const addUpdateCondition = () => {
@@ -3121,14 +3092,39 @@ export default {
       }
     };
 
+    // 清理图表的统一函数
+    const cleanupPieChart = () => {
+      if (pieChartInstance) {
+        try {
+          pieChartInstance.dispose();
+        } catch (error) {
+          console.warn("清理图表实例时出错:", error);
+        }
+        pieChartInstance = null;
+      }
+    };
+
     // 统计分析方法
+    const onStatisticsTableChange = async () => {
+      if (!statisticsForm.value.tableName) {
+        statisticsTableFields.value = [];
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/tableStructure/${statisticsForm.value.tableName}`
+        );
+        statisticsTableFields.value = response.data;
+        statisticsForm.value.fieldName = ""; // 重置字段选择
+      } catch (error) {
+        ElMessage.error("获取表字段失败");
+      }
+    };
+
     const fetchStatistics = async () => {
-      if (
-        !statisticsForm.value.type ||
-        !statisticsForm.value.startDate ||
-        !statisticsForm.value.endDate
-      ) {
-        ElMessage.warning("请填写完整的统计条件");
+      if (!statisticsForm.value.tableName || !statisticsForm.value.fieldName) {
+        ElMessage.warning("请选择表格和字段");
         return;
       }
 
@@ -3138,16 +3134,17 @@ export default {
           "http://localhost:3000/api/statistics",
           {
             params: {
-              type: statisticsForm.value.type,
-              startDate: statisticsForm.value.startDate.toISOString(),
-              endDate: statisticsForm.value.endDate.toISOString(),
+              tableName: statisticsForm.value.tableName,
+              fieldName: statisticsForm.value.fieldName,
             },
           }
         );
 
         statisticsData.value = response.data;
 
-        // 这里可以添加图表展示逻辑
+        // 渲染饼状图
+        await renderPieChart();
+
         ElMessage.success("统计查询成功");
       } catch (error) {
         ElMessage.error(
@@ -3156,6 +3153,98 @@ export default {
       } finally {
         statisticsLoading.value = false;
       }
+    };
+
+    const renderPieChart = async () => {
+      // 等待 DOM 更新完成
+      await nextTick();
+
+      if (
+        !pieChartRef.value ||
+        !statisticsData.value ||
+        !statisticsData.value.data
+      ) {
+        return;
+      }
+
+      // 先清理旧的实例（如果存在）
+      cleanupPieChart();
+
+      // 添加短暂延迟，确保 DOM 完全渲染
+      setTimeout(() => {
+        try {
+          // 检查容器是否还存在
+          if (!pieChartRef.value) {
+            return;
+          }
+
+          // 初始化图表，禁用自动 resize
+          pieChartInstance = echarts.init(pieChartRef.value, null, {
+            renderer: "canvas",
+            useDirtyRect: false, // 禁用脏矩形优化，避免 ResizeObserver 问题
+          });
+
+          // 准备数据
+          const chartData = statisticsData.value.data.map((item) => ({
+            value: item.count,
+            name: item.value || "空值",
+          }));
+
+          // 配置选项
+          const option = {
+            title: {
+              text: `${statisticsForm.value.tableName}.${statisticsForm.value.fieldName} 统计`,
+              left: "center",
+              textStyle: {
+                fontSize: 18,
+                fontWeight: "bold",
+              },
+            },
+            tooltip: {
+              trigger: "item",
+              formatter: "{a} <br/>{b}: {c} ({d}%)",
+            },
+            legend: {
+              orient: "vertical",
+              left: "left",
+              type: "scroll",
+            },
+            series: [
+              {
+                name: "统计数量",
+                type: "pie",
+                radius: ["40%", "70%"],
+                avoidLabelOverlap: false,
+                itemStyle: {
+                  borderRadius: 10,
+                  borderColor: "#fff",
+                  borderWidth: 2,
+                },
+                label: {
+                  show: true,
+                  formatter: "{b}: {c}\n({d}%)",
+                },
+                emphasis: {
+                  label: {
+                    show: true,
+                    fontSize: 16,
+                    fontWeight: "bold",
+                  },
+                },
+                data: chartData,
+              },
+            ],
+          };
+
+          // 设置配置项并渲染
+          pieChartInstance.setOption(option, true); // 使用 notMerge: true 确保完全替换
+
+          // 禁用自动 resize 监听，避免 ResizeObserver 错误
+          window.removeEventListener("resize", pieChartInstance.resize);
+        } catch (error) {
+          console.error("渲染图表失败:", error);
+        }
+      }, 150);
     };
 
     const exportStatistics = async () => {
@@ -3168,8 +3257,77 @@ export default {
     };
 
     onMounted(() => {
+      // 抑制所有 ResizeObserver 相关的错误
+      const originalError = window.console.error;
+      window.console.error = function (...args) {
+        const message = args.join(" ");
+        if (
+          message.includes("ResizeObserver") ||
+          message.includes("ResizeObserver loop") ||
+          message.includes("ResizeObserver loop completed")
+        ) {
+          return; // 完全忽略 ResizeObserver 错误
+        }
+        originalError.apply(window.console, args);
+      };
+
+      // 捕获所有可能的错误
+      const originalOnError = window.onerror;
+      window.onerror = function (message, source, lineno, colno, error) {
+        if (
+          typeof message === "string" &&
+          (message.includes("ResizeObserver") ||
+            message.includes("ResizeObserver loop"))
+        ) {
+          return true; // 阻止错误
+        }
+        if (originalOnError) {
+          return originalOnError(message, source, lineno, colno, error);
+        }
+        return false;
+      };
+
+      // 捕获 Promise rejection
+      window.addEventListener("unhandledrejection", function (event) {
+        if (
+          event.reason &&
+          typeof event.reason === "object" &&
+          event.reason.message &&
+          event.reason.message.includes("ResizeObserver")
+        ) {
+          event.preventDefault();
+          return;
+        }
+      });
+
       fetchTables();
       fetchUpdateHistory(); // 加载更新历史
+    });
+
+    // 组件卸载前清理 ECharts 实例
+    onBeforeUnmount(() => {
+      cleanupPieChart();
+    });
+
+    // 组件激活时（从其他路由返回）
+    onActivated(() => {
+      // 确保图表容器正确渲染
+      if (
+        statisticsData.value &&
+        statisticsData.value.data &&
+        pieChartRef.value
+      ) {
+        nextTick(() => {
+          setTimeout(() => {
+            renderPieChart();
+          }, 200);
+        });
+      }
+    });
+
+    // 组件失活时（切换到其他路由）
+    onDeactivated(() => {
+      cleanupPieChart();
     });
 
     return {
@@ -3313,6 +3471,9 @@ export default {
       statisticsForm,
       statisticsData,
       statisticsLoading,
+      statisticsTableFields,
+      pieChartRef,
+      onStatisticsTableChange,
       fetchStatistics,
       exportStatistics,
     };
@@ -3916,5 +4077,29 @@ export default {
 .database-manager .el-form-item.init {
   /* padding-left: 220px !important; */
   padding-right: 450px !important;
+}
+
+/* 图表容器样式 */
+.chart-container {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  min-height: 500px;
+}
+
+.chart-container > div {
+  min-height: 500px;
+}
+
+/* 修复 ResizeObserver 错误 */
+.database-manager {
+  position: relative;
+}
+
+.database-manager * {
+  box-sizing: border-box;
 }
 </style>

@@ -959,152 +959,49 @@ app.delete("/api/update-history/:id", (req, res) => {
   });
 });
 
-// 获取统计数据API
+// 获取统计数据API - 支持动态表格和字段统计
 app.get("/api/statistics", (req, res) => {
-  const { tableName, fieldName, type, startDate, endDate } = req.query;
+  const { tableName, fieldName } = req.query;
 
-  // 如果是新的动态统计模式
-  if (tableName && fieldName) {
-    if (!type) {
-      return res.status(400).json({ error: "缺少统计类型参数" });
-    }
-
-    try {
-      let sql;
-
-      if (type === "count") {
-        // 统计该字段所有不同值的数量
-        sql = `
-          SELECT ${fieldName} as name, COUNT(*) as count 
-          FROM ${tableName}
-          GROUP BY ${fieldName}
-          ORDER BY count DESC
-        `;
-      } else if (type === "time-range-count") {
-        // 带时间范围的统计
-        if (!startDate || !endDate) {
-          return res
-            .status(400)
-            .json({ error: "时间范围统计需要开始时间和结束时间" });
-        }
-        sql = `
-          SELECT ${fieldName} as name, COUNT(*) as count 
-          FROM ${tableName}
-          WHERE ${fieldName} BETWEEN ? AND ?
-          GROUP BY ${fieldName}
-          ORDER BY count DESC
-        `;
-        db.all(sql, [startDate, endDate], (err, rows) => {
-          if (err) {
-            return res.status(500).json({ error: err.message });
-          }
-          res.json({
-            type,
-            tableName,
-            fieldName,
-            data: rows,
-          });
-        });
-        return;
-      } else {
-        return res.status(400).json({ error: "不支持的统计类型" });
-      }
-
-      db.all(sql, [], (err, rows) => {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-
-        res.json({
-          type,
-          tableName,
-          fieldName,
-          data: rows,
-        });
-      });
-    } catch (error) {
-      res.status(500).json({ error: "统计查询失败", details: error.message });
-    }
-    return;
-  }
-
-  // 原有的固定统计逻辑（保持兼容性）
-  if (!type || !startDate || !endDate) {
-    return res.status(400).json({ error: "缺少必要参数" });
+  if (!tableName || !fieldName) {
+    return res
+      .status(400)
+      .json({ error: "缺少必要参数 tableName 和 fieldName" });
   }
 
   try {
-    let sql;
+    // 构建统计 SQL - 按字段值分组统计
+    const sql = `
+      SELECT 
+        ${fieldName} as value,
+        COUNT(*) as count,
+        ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM ${tableName}), 2) as percentage
+      FROM ${tableName}
+      GROUP BY ${fieldName}
+      ORDER BY count DESC
+    `;
 
-    switch (type) {
-      case "top-departments":
-        // 统计就诊量前5的科室
-        sql = `
-          SELECT 科室, COUNT(*) as count 
-          FROM 诊疗记录表 
-          WHERE 日期 BETWEEN ? AND ? 
-          GROUP BY 科室 
-          ORDER BY count DESC 
-          LIMIT 5
-        `;
-        break;
+    console.log("执行统计查询SQL:", sql);
 
-      case "top-doctors":
-        // 统计就诊量前5的医生
-        sql = `
-          SELECT 主治医生, COUNT(*) as count 
-          FROM 诊疗记录表 
-          WHERE 日期 BETWEEN ? AND ? 
-          GROUP BY 主治医生 
-          ORDER BY count DESC 
-          LIMIT 5
-        `;
-        break;
-
-      case "visit-trend":
-        // 计算时间间隔
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-
-        let dateFormat;
-        if (diffDays <= 1) {
-          dateFormat = "%Y-%m-%d %H:00:00"; // 按小时
-        } else if (diffDays <= 31) {
-          dateFormat = "%Y-%m-%d"; // 按天
-        } else if (diffDays <= 365) {
-          dateFormat = "%Y-%m"; // 按月
-        } else {
-          dateFormat = "%Y"; // 按年
-        }
-
-        // 统计就诊趋势
-        sql = `
-          SELECT strftime('${dateFormat}', 日期) as period, COUNT(*) as count 
-          FROM 诊疗记录表 
-          WHERE 日期 BETWEEN ? AND ? 
-          GROUP BY period 
-          ORDER BY period
-        `;
-        break;
-
-      default:
-        return res.status(400).json({ error: "不支持的统计类型" });
-    }
-
-    db.all(sql, [startDate, endDate], (err, rows) => {
+    db.all(sql, [], (err, rows) => {
       if (err) {
-        return res.status(500).json({ error: err.message });
+        console.error("统计查询失败:", err.message);
+        return res.status(500).json({
+          error: "统计查询失败",
+          details: err.message,
+          sql: sql,
+        });
       }
 
       res.json({
-        type,
-        startDate,
-        endDate,
+        tableName,
+        fieldName,
         data: rows,
+        totalCount: rows.reduce((sum, row) => sum + row.count, 0),
       });
     });
   } catch (error) {
+    console.error("统计查询出错:", error);
     res.status(500).json({ error: "统计查询失败", details: error.message });
   }
 });

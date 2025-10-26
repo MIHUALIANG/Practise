@@ -8,27 +8,7 @@ import 'element-plus/dist/index.css';
 import '../src/CSS/HomeView.css';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 
-// 彻底解决ResizeObserver错误
-const resizeObserverErrorHandler = e => {
-  if (e.message === 'ResizeObserver loop completed with undelivered notifications.') {
-    return;
-  }
-  console.error(e);
-};
-
-// 添加多个事件监听器，覆盖所有可能的情况
-window.addEventListener('error', resizeObserverErrorHandler);
-
-// 捕获未处理的Promise拒绝
-window.addEventListener('unhandledrejection', e => {
-  if (e.reason && e.reason.message && e.reason.message.includes('ResizeObserver')) {
-    e.preventDefault();
-    return;
-  }
-  console.error('Unhandled promise rejection:', e.reason);
-});
-
-// 重写ResizeObserver以避免循环错误
+// 彻底解决ResizeObserver错误 - 重写 ResizeObserver
 const ResizeObserverOrig = window.ResizeObserver;
 window.ResizeObserver = class ResizeObserver extends ResizeObserverOrig {
   constructor(callback) {
@@ -36,7 +16,10 @@ window.ResizeObserver = class ResizeObserver extends ResizeObserverOrig {
       try {
         return callback(entries, observer);
       } catch (e) {
-        if (e.message === 'ResizeObserver loop completed with undelivered notifications.') {
+        if (
+          e.message && e.message.includes('ResizeObserver') ||
+          e.message && e.message.includes('ResizeObserver loop')
+        ) {
           return;
         }
         throw e;
@@ -45,6 +28,39 @@ window.ResizeObserver = class ResizeObserver extends ResizeObserverOrig {
     super(wrappedCallback);
   }
 };
+
+// 全局错误抑制
+const originalError = window.console.error;
+window.console.error = function(...args) {
+  const message = args.join(' ');
+  if (message.includes('ResizeObserver')) {
+    return;
+  }
+  originalError.apply(window.console, args);
+};
+
+// 捕获所有错误
+window.addEventListener('error', (e) => {
+  if (e.message && e.message.includes('ResizeObserver')) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }
+}, true);
+
+// 捕获未处理的Promise拒绝
+window.addEventListener('unhandledrejection', (e) => {
+  if (
+    e.reason && 
+    (
+      (typeof e.reason === 'string' && e.reason.includes('ResizeObserver')) ||
+      (e.reason.message && e.reason.message.includes('ResizeObserver'))
+    )
+  ) {
+    e.preventDefault();
+    return false;
+  }
+});
 
 const app = createApp(App);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
