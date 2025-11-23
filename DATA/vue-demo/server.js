@@ -386,6 +386,42 @@ app.get("/api/getData/:tableName", (req, res) => {
   });
 });
 
+// 验证数据类型
+function validateDataType(fieldType, value) {
+  if (value === null || value === undefined || value === "") {
+    return { valid: true }; // 空值由NOT NULL约束处理
+  }
+
+  const type = fieldType.toUpperCase();
+  const stringValue = String(value).trim();
+
+  if (type === "INTEGER") {
+    if (!/^-?\d+$/.test(stringValue)) {
+      return {
+        valid: false,
+        message: `字段类型为INTEGER，但输入的值 "${value}" 不是有效的整数`,
+      };
+    }
+  } else if (type === "REAL") {
+    if (!/^-?\d*\.?\d+$/.test(stringValue) && !/^-?\d+$/.test(stringValue)) {
+      return {
+        valid: false,
+        message: `字段类型为REAL，但输入的值 "${value}" 不是有效的数字`,
+      };
+    }
+  } else if (type === "DATETIME") {
+    const date = new Date(stringValue);
+    if (isNaN(date.getTime())) {
+      return {
+        valid: false,
+        message: `字段类型为DATETIME，但输入的值 "${value}" 不是有效的日期时间格式`,
+      };
+    }
+  }
+
+  return { valid: true };
+}
+
 // 更新数据接口
 app.put("/api/updateData/:tableName/:id", (req, res) => {
   const { tableName, id } = req.params;
@@ -395,23 +431,56 @@ app.put("/api/updateData/:tableName/:id", (req, res) => {
     return res.status(400).json({ error: "更新数据不能为空" });
   }
 
-  const setClause = Object.keys(data)
-    .map((key) => `${key} = ?`)
-    .join(", ");
-  const values = [...Object.values(data), id];
-
-  const sql = `UPDATE ${tableName} SET ${setClause} WHERE rowid = ?`;
-
-  db.run(sql, values, function (err) {
+  // 获取表结构进行数据类型验证
+  db.all(`PRAGMA table_info(${tableName})`, [], (err, columns) => {
     if (err) {
-      console.error(err.message);
       return res
         .status(500)
-        .json({ error: "更新数据失败", details: err.message });
+        .json({ error: "获取表结构失败", details: err.message });
     }
-    res.json({
-      message: "数据更新成功",
-      changes: this.changes,
+
+    if (!columns || !Array.isArray(columns)) {
+      return res
+        .status(500)
+        .json({ error: "获取表结构失败，返回数据格式错误" });
+    }
+
+    // 验证每个字段的数据类型
+    for (const [fieldName, value] of Object.entries(data)) {
+      const column = columns.find((col) => col && col.name === fieldName);
+      if (column && column.type) {
+        const validation = validateDataType(column.type, value);
+        if (!validation.valid) {
+          return res.status(400).json({
+            error: "数据类型验证失败",
+            details: validation.message,
+            field: fieldName,
+            expectedType: column.type,
+            receivedValue: value,
+          });
+        }
+      }
+    }
+
+    // 数据类型验证通过，执行更新
+    const setClause = Object.keys(data)
+      .map((key) => `${key} = ?`)
+      .join(", ");
+    const values = [...Object.values(data), id];
+
+    const sql = `UPDATE ${tableName} SET ${setClause} WHERE rowid = ?`;
+
+    db.run(sql, values, function (err) {
+      if (err) {
+        console.error(err.message);
+        return res
+          .status(500)
+          .json({ error: "更新数据失败", details: err.message });
+      }
+      res.json({
+        message: "数据更新成功",
+        changes: this.changes,
+      });
     });
   });
 });
@@ -2095,36 +2164,44 @@ function buildAdvancedQuery(
   // WHERE 子句 - 处理条件中的表名
   let whereClause = "";
   if (conditions && conditions.length > 0) {
-    const processedConditions = conditions.map((condition) => {
-      let { field, operator, value } = condition;
+    const processedConditions = conditions
+      .filter((condition) => condition.field && condition.field.trim() !== "") // 过滤掉空字段
+      .map((condition) => {
+        let { field, operator, value } = condition;
 
-      // 如果字段没有表名前缀，添加第一个表的表名
-      if (!field.includes(".")) {
-        field = `${tables[0].name}.${field}`;
-      } else {
-        // 如果字段有表名前缀，检查是否是别名，如果是则替换为实际表名
-        const [tableAlias, columnName] = field.split(".");
-        const table = tables.find(
-          (t) => t.alias === tableAlias || t.name === tableAlias
-        );
-        if (table && table.name !== tableAlias) {
-          field = `${table.name}.${columnName}`;
+        // 如果字段为空或未定义，跳过
+        if (!field || field.trim() === "") {
+          return null;
         }
-      }
 
-      let conditionStr = `${field} ${operator} `;
+        // 如果字段没有表名前缀，添加第一个表的表名
+        if (!field.includes(".")) {
+          field = `${tables[0].name}.${field}`;
+        } else {
+          // 如果字段有表名前缀，检查是否是别名，如果是则替换为实际表名
+          const [tableAlias, columnName] = field.split(".");
+          const table = tables.find(
+            (t) => t.alias === tableAlias || t.name === tableAlias
+          );
+          if (table && table.name !== tableAlias) {
+            field = `${table.name}.${columnName}`;
+          }
+        }
 
-      // 处理不同的值类型
-      if (operator.toUpperCase() === "LIKE") {
-        conditionStr += `'%${value}%'`;
-      } else if (typeof value === "string") {
-        conditionStr += `'${value}'`;
-      } else {
-        conditionStr += value;
-      }
+        let conditionStr = `${field} ${operator} `;
 
-      return conditionStr;
-    });
+        // 处理不同的值类型
+        if (operator.toUpperCase() === "LIKE") {
+          conditionStr += `'%${value}%'`;
+        } else if (typeof value === "string") {
+          conditionStr += `'${value}'`;
+        } else {
+          conditionStr += value;
+        }
+
+        return conditionStr;
+      })
+      .filter((condition) => condition !== null); // 过滤掉null值
 
     whereClause = processedConditions.join(" AND ");
   }

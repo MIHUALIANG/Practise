@@ -192,9 +192,9 @@
           </el-card>
 
           <!-- 数据表格 -->
-          <el-card v-if="currentTable" class="section-card">
+          <el-card v-if="currentTable" class="section-card sticky-card">
             <template #header>
-              <div class="card-header">
+              <div class="card-header sticky-toolbar">
                 <span>数据管理 - {{ currentTable }}</span>
                 <div>
                   <el-button
@@ -489,10 +489,12 @@
       <el-tab-pane label="跨表更新" name="cross-table-update">
         <div class="tab-content">
           <div class="update-section">
+            <h3 class="section-title">🔄 跨表关联数据更新</h3>
+
             <!-- 条件设置区域 -->
             <el-card class="subsection-card">
               <template #header>
-                <span>设置更新条件</span>
+                <span>1. 设置更新条件</span>
               </template>
 
               <div
@@ -570,7 +572,7 @@
             <!-- 更新字段设置区域 -->
             <el-card class="subsection-card">
               <template #header>
-                <span>设置更新字段</span>
+                <span>2. 设置更新字段</span>
               </template>
 
               <el-form
@@ -646,36 +648,6 @@
               </el-form>
             </el-card>
 
-            <!-- 跨表更新安全设置 -->
-            <el-card class="subsection-card">
-              <div
-                style="
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  padding: 20px;
-                "
-              >
-                <span style="margin-right: 15px; font-size: 14px"
-                  >禁止未定义关系的跨表更新</span
-                >
-                <el-switch
-                  v-model="updateSettings.strictMode"
-                  active-text="已开启"
-                  inactive-text="已关闭"
-                >
-                </el-switch>
-                <el-tooltip
-                  content="开启后，只有明确定义了关联关系的表之间才能进行跨表更新，避免误操作"
-                  placement="top"
-                >
-                  <el-icon style="margin-left: 10px; cursor: pointer">
-                    <QuestionFilled />
-                  </el-icon>
-                </el-tooltip>
-              </div>
-            </el-card>
-
             <!-- 操作按钮 -->
             <div class="action-buttons">
               <el-button
@@ -729,6 +701,8 @@
       <el-tab-pane label="更新历史" name="update-history">
         <div class="tab-content">
           <div class="history-section">
+            <h3 class="section-title">📋 更新操作历史</h3>
+
             <!-- 筛选条件 -->
             <el-card class="subsection-card">
               <template #header>
@@ -865,6 +839,8 @@
       <el-tab-pane label="统计分析" name="statistics">
         <div class="tab-content">
           <div class="statistics-section">
+            <h3 class="section-title">📊 数据统计分析</h3>
+
             <!-- 统计条件 -->
             <el-card class="subsection-card">
               <template #header>
@@ -973,10 +949,71 @@
       <el-tab-pane label="高级查询" name="advanced-query">
         <div class="tab-content">
           <div class="query-section">
+            <h3 class="section-title">🔍 高级查询</h3>
+
+            <!-- 表选择区域 -->
+            <el-card class="subsection-card">
+              <template #header>
+                <span>1. 选择查询表</span>
+              </template>
+
+              <div
+                v-for="(table, index) in queryConfig.tables"
+                :key="index"
+                class="table-item"
+              >
+                <el-select
+                  v-model="table.name"
+                  placeholder="选择表"
+                  @change="onTableChange(table, index)"
+                  style="width: 200px"
+                >
+                  <el-option
+                    v-for="t in availableTables"
+                    :key="t"
+                    :label="t"
+                    :value="t"
+                  ></el-option>
+                </el-select>
+
+                <el-input
+                  v-model="table.alias"
+                  placeholder="表别名"
+                  style="width: 120px; margin-left: 10px"
+                ></el-input>
+
+                <el-button
+                  @click="removeTable(index)"
+                  type="danger"
+                  text
+                  style="margin-left: 10px"
+                  :disabled="queryConfig.tables.length === 1"
+                >
+                  删除
+                </el-button>
+              </div>
+
+              <el-button
+                @click="addTable"
+                type="primary"
+                style="margin-top: 10px"
+                >添加表</el-button
+              >
+
+              <!-- 表关系设置按钮 -->
+              <el-button
+                v-if="queryConfig.tables.length > 1"
+                @click="showRelationDialog = true"
+                type="success"
+                style="margin-top: 10px; margin-left: 10px"
+                >设置表关系</el-button
+              >
+            </el-card>
+
             <!-- 查询条件区域 -->
             <el-card class="subsection-card">
               <template #header>
-                <span>设置查询条件</span>
+                <span>2. 设置查询条件</span>
               </template>
 
               <div
@@ -984,17 +1021,37 @@
                 :key="index"
                 class="condition-item"
               >
+                <!-- 只有一个表时，不显示表选择器，自动使用该表 -->
+                <template v-if="queryConfig.tables.length === 1">
+                  <el-tag
+                    type="info"
+                    style="
+                      width: 150px;
+                      height: 32px;
+                      line-height: 32px;
+                      margin-right: 10px;
+                      justify-content: center;
+                    "
+                  >
+                    {{
+                      queryConfig.tables[0].alias || queryConfig.tables[0].name
+                    }}
+                  </el-tag>
+                </template>
+
+                <!-- 多个表时显示表选择器 -->
                 <el-select
+                  v-else
                   v-model="condition.table"
                   placeholder="选择表"
                   style="width: 150px"
                   @change="condition.field = ''"
                 >
                   <el-option
-                    v-for="table in availableTables"
-                    :key="table"
-                    :label="table"
-                    :value="table"
+                    v-for="table in queryConfig.tables"
+                    :key="table.name"
+                    :label="table.alias || table.name"
+                    :value="table.name"
                   ></el-option>
                 </el-select>
 
@@ -1002,14 +1059,28 @@
                   v-model="condition.field"
                   placeholder="选择字段"
                   style="width: 200px; margin-left: 10px"
-                  :disabled="!condition.table"
+                  :disabled="!condition.table && queryConfig.tables.length > 1"
                 >
                   <el-option
-                    v-for="col in getTableColumns(condition.table)"
-                    :key="`${condition.table}.${col.name}`"
+                    v-for="col in getTableColumns(
+                      condition.table ||
+                        (queryConfig.tables.length === 1
+                          ? queryConfig.tables[0].name
+                          : '')
+                    )"
+                    :key="`${
+                      condition.table || queryConfig.tables[0]?.name || ''
+                    }.${col.name}`"
                     :label="col.name"
                     :value="
-                      condition.table ? `${condition.table}.${col.name}` : ''
+                      condition.table ||
+                      (queryConfig.tables.length === 1
+                        ? queryConfig.tables[0].name
+                        : '')
+                        ? `${condition.table || queryConfig.tables[0].name}.${
+                            col.name
+                          }`
+                        : ''
                     "
                   ></el-option>
                 </el-select>
@@ -1326,7 +1397,39 @@
           :key="column.name"
           :label="column.name"
         >
+          <!-- INTEGER类型：使用数字输入框 -->
+          <el-input-number
+            v-if="column.type && column.type.toUpperCase() === 'INTEGER'"
+            v-model="editingData[column.name]"
+            :placeholder="`请输入 ${column.name}（整数）`"
+            :controls="false"
+            :precision="0"
+            style="width: 100%"
+            @blur="validateFieldValue(column.name, editingData[column.name])"
+          ></el-input-number>
+          <!-- REAL类型：使用数字输入框 -->
+          <el-input-number
+            v-else-if="column.type && column.type.toUpperCase() === 'REAL'"
+            v-model="editingData[column.name]"
+            :placeholder="`请输入 ${column.name}（数字）`"
+            :controls="false"
+            style="width: 100%"
+            @blur="validateFieldValue(column.name, editingData[column.name])"
+          ></el-input-number>
+          <!-- DATETIME类型：使用日期时间选择器 -->
+          <el-date-picker
+            v-else-if="column.type && column.type.toUpperCase() === 'DATETIME'"
+            v-model="editingData[column.name]"
+            type="datetime"
+            :placeholder="`请选择 ${column.name}`"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 100%"
+            clearable
+          ></el-date-picker>
+          <!-- 其他类型：使用普通文本输入框 -->
           <el-input
+            v-else
             v-model="editingData[column.name]"
             :placeholder="`请输入 ${column.name}`"
             clearable
@@ -1344,7 +1447,7 @@
     <!-- 预览更新对话框 -->
     <el-dialog
       v-model="previewDialogVisible"
-      title="更新预览"
+      title="🔍 更新预览"
       width="90%"
       :close-on-click-modal="false"
       class="preview-dialog"
@@ -1462,6 +1565,10 @@
       <div v-if="modificationDetails">
         <!-- 修改前后对比表格 -->
         <div v-if="getDetailedComparisonData().length > 0">
+          <div class="comparison-header">
+            <h4>📊 修改前后对比</h4>
+          </div>
+
           <el-table
             :data="getDetailedComparisonData()"
             border
@@ -1566,13 +1673,7 @@ import {
   watch,
 } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import {
-  Edit,
-  Close,
-  Check,
-  Document,
-  QuestionFilled,
-} from "@element-plus/icons-vue";
+import { Edit, Close, Check, Document } from "@element-plus/icons-vue";
 import * as echarts from "echarts";
 
 export default {
@@ -1586,6 +1687,7 @@ export default {
     const queryLoading = ref(false);
 
     const queryConfig = ref({
+      tables: [{ name: "", alias: "t1" }],
       joins: [],
       conditions: [{ table: "", field: "", operator: "=", value: "" }],
     });
@@ -1631,6 +1733,15 @@ export default {
       }
     };
 
+    const onTableChange = async (table, index) => {
+      if (table.name) {
+        await fetchTableColumns(table.name);
+        if (!table.alias) {
+          table.alias = `t${index + 1}`;
+        }
+      }
+    };
+
     const getTableColumns = (tableName) => {
       // 如果表名为空，直接返回空数组
       if (!tableName) return [];
@@ -1642,9 +1753,29 @@ export default {
       return tableColumns.value[tableName] || [];
     };
 
+    const addTable = () => {
+      const newIndex = queryConfig.value.tables.length;
+      queryConfig.value.tables.push({
+        name: "",
+        alias: `t${newIndex + 1}`,
+      });
+    };
+
+    const removeTable = (index) => {
+      if (queryConfig.value.tables.length > 1) {
+        queryConfig.value.tables.splice(index, 1);
+      }
+    };
+
     const addCondition = () => {
+      // 如果只有一个表，自动设置为该表
+      const defaultTable =
+        queryConfig.value.tables.length === 1
+          ? queryConfig.value.tables[0].name
+          : "";
+
       queryConfig.value.conditions.push({
-        table: "",
+        table: defaultTable,
         field: "",
         operator: "=",
         value: "",
@@ -1658,9 +1789,20 @@ export default {
     const resetAdvancedQuery = () => {
       // 重置查询配置
       queryConfig.value = {
+        tables: [{ name: "", alias: "t1" }],
         joins: [],
         conditions: [{ table: "", field: "", operator: "=", value: "" }],
       };
+
+      // 如果只有一个表，自动设置条件的table字段
+      if (
+        queryConfig.value.tables.length === 1 &&
+        queryConfig.value.tables[0].name
+      ) {
+        queryConfig.value.conditions.forEach((condition) => {
+          condition.table = queryConfig.value.tables[0].name;
+        });
+      }
 
       // 重置查询结果
       queryResult.value = { data: null, count: 0, sql: "", totalCount: 0 };
@@ -1674,26 +1816,27 @@ export default {
     };
 
     const executeQuery = async () => {
-      // 验证条件是否完整
-      if (
-        queryConfig.value.conditions.some(
-          (c) => !c.table || !c.field || !c.value
-        )
-      ) {
-        ElMessage.warning("请填写完整的查询条件（表、字段和值）");
+      if (queryConfig.value.tables.some((table) => !table.name)) {
+        ElMessage.warning("请选择所有表");
         return;
       }
 
-      // 从条件中提取所有涉及的表
-      const involvedTables = new Set();
-      queryConfig.value.conditions.forEach((condition) => {
-        if (condition.table) {
-          involvedTables.add(condition.table);
-        }
-      });
+      // 如果只有一个表，确保所有条件的table字段都设置了
+      if (queryConfig.value.tables.length === 1) {
+        const tableName = queryConfig.value.tables[0].name;
+        queryConfig.value.conditions.forEach((condition) => {
+          if (!condition.table || condition.table === "") {
+            condition.table = tableName;
+          }
+          // 如果field是空的或者只有字段名，添加表名前缀
+          if (condition.field && !condition.field.includes(".")) {
+            condition.field = `${tableName}.${condition.field}`;
+          }
+        });
+      }
 
-      // 如果有多个表，检查是否存在关系
-      if (involvedTables.size > 1) {
+      // 如果有多个表，检查是否存在关系，如果没有关系则提示用户
+      if (queryConfig.value.tables.length > 1) {
         const hasJoins =
           queryConfig.value.joins && queryConfig.value.joins.length > 0;
 
@@ -1725,9 +1868,7 @@ export default {
       try {
         // 准备分页参数
         const queryParams = {
-          tables: extractTablesFromConditions(),
-          joins: queryConfig.value.joins || [],
-          conditions: queryConfig.value.conditions || [],
+          ...queryConfig.value,
           page: currentPage.value,
           pageSize: pageSize.value,
         };
@@ -1751,27 +1892,20 @@ export default {
     // 根据表间关系自动生成JOIN条件
     const generateAutoJoins = () => {
       const autoJoins = [];
-
-      // 从条件中提取所有涉及的表
-      const selectedTables = new Set();
-      queryConfig.value.conditions.forEach((condition) => {
-        if (condition.table) {
-          selectedTables.add(condition.table);
-        }
-      });
-      const selectedTablesArray = Array.from(selectedTables);
+      const selectedTables = queryConfig.value.tables.map((t) => t.name);
 
       // 遍历所有关系，找出与所选表相关的
       relations.value.forEach((relation) => {
-        const primaryTableIndex = selectedTablesArray.indexOf(
-          relation.primaryTable
-        );
-        const foreignTableIndex = selectedTablesArray.indexOf(
-          relation.foreignTable
-        );
+        const primaryTableIndex = selectedTables.indexOf(relation.primaryTable);
+        const foreignTableIndex = selectedTables.indexOf(relation.foreignTable);
 
         // 如果两个表都被选中，则创建JOIN条件
         if (primaryTableIndex !== -1 && foreignTableIndex !== -1) {
+          const primaryAlias =
+            queryConfig.value.tables[primaryTableIndex].alias;
+          const foreignAlias =
+            queryConfig.value.tables[foreignTableIndex].alias;
+
           // 根据关系类型确定JOIN类型
           let joinType = "INNER JOIN";
           if (relation.relationType === "one-to-one") {
@@ -1789,8 +1923,8 @@ export default {
           }
 
           autoJoins.push({
-            leftTable: relation.primaryTable,
-            rightTable: relation.foreignTable,
+            leftTable: primaryAlias,
+            rightTable: foreignAlias,
             leftColumn: relation.primaryColumn,
             rightColumn: relation.foreignColumn,
             joinType: joinType,
@@ -1814,19 +1948,6 @@ export default {
       saveTemplateDialogVisible.value = true;
     };
 
-    // 从条件中提取表并转换为后端格式
-    const extractTablesFromConditions = () => {
-      const involvedTables = new Set();
-      queryConfig.value.conditions.forEach((condition) => {
-        if (condition.table) {
-          involvedTables.add(condition.table);
-        }
-      });
-      return Array.from(involvedTables).map((tableName) => ({
-        name: tableName,
-      }));
-    };
-
     const saveTemplate = async () => {
       if (!templateForm.value.name) {
         ElMessage.warning("请输入模板名称");
@@ -1836,9 +1957,7 @@ export default {
       try {
         await axios.post("http://localhost:3000/api/query-templates", {
           ...templateForm.value,
-          tables: extractTablesFromConditions(),
-          joins: queryConfig.value.joins || [],
-          conditions: queryConfig.value.conditions || [],
+          ...queryConfig.value,
         });
         ElMessage.success("模板保存成功");
         saveTemplateDialogVisible.value = false;
@@ -1884,12 +2003,7 @@ export default {
       try {
         const response = await axios.post(
           "http://localhost:3000/api/export-query",
-          {
-            tables: extractTablesFromConditions(),
-            joins: queryConfig.value.joins || [],
-            conditions: queryConfig.value.conditions || [],
-            format,
-          },
+          { ...queryConfig.value, format },
           { responseType: "blob" }
         );
 
@@ -2003,6 +2117,22 @@ export default {
       };
     };
 
+    // 监听表变化，自动设置条件的table字段（当只有一个表时）
+    watch(
+      () => queryConfig.value.tables,
+      (newTables) => {
+        if (newTables.length === 1 && newTables[0].name) {
+          // 如果只有一个表且表名不为空，自动设置所有条件的table字段
+          queryConfig.value.conditions.forEach((condition) => {
+            if (!condition.table || condition.table === "") {
+              condition.table = newTables[0].name;
+            }
+          });
+        }
+      },
+      { deep: true }
+    );
+
     // 在 onMounted 中添加
     onMounted(() => {
       fetchTables();
@@ -2064,6 +2194,9 @@ export default {
     const addDataDialogVisible = ref(false);
     const editDataDialogVisible = ref(false);
 
+    // 当前正在管理字段的表名
+    const managingTableName = ref("");
+
     // 表单数据
     const renameTableForm = ref({ oldName: "", newName: "" });
     const newColumn = ref({
@@ -2073,7 +2206,7 @@ export default {
       notNull: false,
       unique: false,
     });
-    const renameColumnForm = ref({ oldName: "", newName: "" });
+    const renameColumnForm = ref({ oldName: "", newName: "", tableName: "" });
     const tableDetails = ref(null);
     const newData = ref({});
     const editingData = ref({});
@@ -2096,13 +2229,72 @@ export default {
 
     // 字段值域验证函数
     const validateFieldValue = (fieldName, value) => {
+      // 如果值为空，跳过验证（允许空值，除非字段设置为NOT NULL）
+      if (value === "" || value === null || value === undefined) {
+        return { valid: true };
+      }
+
+      // 首先进行数据类型验证
+      const fieldInfo = tableStructure.value.find(
+        (col) => col.name === fieldName
+      );
+      if (fieldInfo && fieldInfo.type) {
+        const fieldType = fieldInfo.type.toUpperCase();
+        const stringValue = String(value).trim();
+
+        // INTEGER类型验证
+        if (fieldType === "INTEGER") {
+          // 检查是否为整数（允许负数）
+          if (!/^-?\d+$/.test(stringValue)) {
+            ElMessage.warning(
+              `字段 "${fieldName}" 是整数类型，请输入有效的整数`
+            );
+            return {
+              valid: false,
+              message: `字段 "${fieldName}" 是整数类型，请输入有效的整数`,
+            };
+          }
+        }
+        // REAL类型验证
+        else if (fieldType === "REAL") {
+          // 检查是否为数字（整数或小数）
+          if (
+            !/^-?\d*\.?\d+$/.test(stringValue) &&
+            !/^-?\d+$/.test(stringValue)
+          ) {
+            ElMessage.warning(
+              `字段 "${fieldName}" 是实数类型，请输入有效的数字`
+            );
+            return {
+              valid: false,
+              message: `字段 "${fieldName}" 是实数类型，请输入有效的数字`,
+            };
+          }
+        }
+        // DATETIME类型验证（简单验证）
+        else if (fieldType === "DATETIME") {
+          // 尝试解析日期时间，如果不是有效日期则报错
+          const date = new Date(stringValue);
+          if (isNaN(date.getTime()) && stringValue !== "") {
+            ElMessage.warning(
+              `字段 "${fieldName}" 是日期时间类型，请输入有效的日期时间格式`
+            );
+            return {
+              valid: false,
+              message: `字段 "${fieldName}" 是日期时间类型，请输入有效的日期时间格式`,
+            };
+          }
+        }
+      }
+
       // 将字段名转换为小写，以支持不同的大小写变体
       const lowerFieldName = fieldName.toLowerCase();
 
-      // 检查是否有匹配的验证规则
+      // 检查是否有匹配的验证规则（值域验证）
       for (const [ruleField, rule] of Object.entries(fieldValidationRules)) {
         if (lowerFieldName.includes(ruleField.toLowerCase())) {
           if (!rule.allowedValues.includes(value)) {
+            ElMessage.warning(rule.message);
             return {
               valid: false,
               message: rule.message,
@@ -2255,6 +2447,7 @@ export default {
 
     const showManageColumnsDialog = async (tableName) => {
       try {
+        managingTableName.value = tableName; // 保存当前管理的表名
         const response = await axios.get(
           `http://localhost:3000/api/tableStructure/${tableName}`
         );
@@ -2266,10 +2459,16 @@ export default {
     };
 
     const showRenameColumnDialog = (columnName) => {
+      // 使用 managingTableName 而不是 currentTable，因为 currentTable 是数据管理标签页的表
+      const tableName = managingTableName.value || currentTable.value;
+      if (!tableName) {
+        ElMessage.error("无法确定表名，请先选择表");
+        return;
+      }
       renameColumnForm.value = {
         oldName: columnName,
         newName: "",
-        tableName: currentTable.value,
+        tableName: tableName,
       };
       renameColumnDialogVisible.value = true;
     };
@@ -2283,7 +2482,10 @@ export default {
         ElMessage.success(response.data.message);
         renameColumnDialogVisible.value = false;
         fetchTables();
-        if (currentTable.value) {
+        // 刷新管理字段对话框的数据
+        if (managingTableName.value) {
+          await showManageColumnsDialog(managingTableName.value);
+        } else if (currentTable.value) {
           viewTableData(currentTable.value);
         }
       } catch (error) {
@@ -2305,15 +2507,25 @@ export default {
           }
         );
 
+        // 使用 managingTableName 而不是 currentTable
+        const tableName = managingTableName.value || currentTable.value;
+        if (!tableName) {
+          ElMessage.error("无法确定表名，请先选择表");
+          return;
+        }
+
         const response = await axios.delete(
           "http://localhost:3000/api/removeColumn",
           {
-            data: { tableName: currentTable.value, columnName },
+            data: { tableName: tableName, columnName },
           }
         );
         ElMessage.success(response.data.message);
         fetchTables();
-        if (currentTable.value) {
+        // 刷新管理字段对话框的数据
+        if (managingTableName.value) {
+          await showManageColumnsDialog(managingTableName.value);
+        } else if (currentTable.value) {
           viewTableData(currentTable.value);
         }
       } catch (error) {
@@ -2529,13 +2741,15 @@ export default {
             continue;
           }
 
-          // 对每个字段进行值域验证
+          // 对每个字段进行数据类型和值域验证
           const fieldValidation = validateFieldValue(fieldName, value);
           if (!fieldValidation.valid) {
             ElMessageBox.alert(
-              `字段 "${fieldName}" 的值不符合要求。\n${
-                fieldValidation.message
-              }\n允许的值: ${fieldValidation.allowedValues.join(", ")}`,
+              fieldValidation.allowedValues
+                ? `字段 "${fieldName}" 的值不符合要求。\n${
+                    fieldValidation.message
+                  }\n允许的值: ${fieldValidation.allowedValues.join(", ")}`
+                : fieldValidation.message,
               "字段值验证失败",
               {
                 confirmButtonText: "确定",
@@ -2556,9 +2770,23 @@ export default {
         editDataDialogVisible.value = false;
         refreshTableData();
       } catch (error) {
-        ElMessage.error(
-          `更新数据失败: ${error.response?.data?.details || error.message}`
-        );
+        console.error("更新数据失败:", error);
+        console.error("错误详情:", error.response?.data);
+
+        // 构建详细的错误信息
+        let errorMessage = "更新数据失败";
+        if (error.response?.data) {
+          const errorData = error.response.data;
+          if (errorData.details) {
+            errorMessage += `: ${errorData.details}`;
+          } else if (errorData.error) {
+            errorMessage += `: ${errorData.error}`;
+          }
+        } else if (error.message) {
+          errorMessage += `: ${error.message}`;
+        }
+
+        ElMessage.error(errorMessage);
       } finally {
         updateLoading.value = false;
       }
@@ -2834,11 +3062,6 @@ export default {
       operator: "",
     });
 
-    // 跨表更新安全设置
-    const updateSettings = ref({
-      strictMode: false, // 默认关闭，允许未定义关系的跨表更新
-    });
-
     const updateResult = ref(null);
     const previewResult = ref(null);
     const previewDialogVisible = ref(false);
@@ -3075,26 +3298,8 @@ export default {
           if (hasDefinedRelations) break;
         }
 
-        // 如果没有定义的关系，根据设置决定是否允许操作
+        // 如果没有定义的关系，给出警告
         if (!hasDefinedRelations) {
-          // 如果开启了严格模式，直接禁止操作
-          if (updateSettings.value.strictMode) {
-            ElMessageBox.alert(
-              `❌ 跨表更新被禁止！\n\n涉及的表（${Array.from(
-                tablesInConditions
-              ).join(
-                "、"
-              )}）之间没有明确定义关联关系。\n\n请在"关系管理"标签页中先定义表之间的关联关系，或关闭"禁止未定义关系的跨表更新"设置。`,
-              "跨表更新被禁止",
-              {
-                confirmButtonText: "我知道了",
-                type: "error",
-              }
-            );
-            return;
-          }
-
-          // 如果没有开启严格模式，给出警告提示
           const confirmResult = await ElMessageBox.confirm(
             "您正在进行跨表更新操作，但涉及的表之间没有明确定义关系。系统将尝试自动推断关联关系，但这可能导致更新了错误的记录。建议您先在关系管理中定义表之间的关系。是否继续？",
             "跨表更新警告",
@@ -3633,47 +3838,47 @@ export default {
       fetchTables();
       fetchUpdateHistory(); // 加载更新历史
 
-      // 吸顶效果 - 滚动监听（用于动态样式调整）
-      let ticking = false;
+      // 添加滚动监听，为吸顶工具栏添加阴影效果
       const handleScroll = () => {
-        if (!ticking) {
-          requestAnimationFrame(() => {
-            const tabsContainer = document.querySelector(".el-tabs");
-            const scrollTop =
-              window.pageYOffset || document.documentElement.scrollTop;
-
-            if (tabsContainer) {
-              if (scrollTop > 50) {
-                // 滚动超过50px时，增强吸顶效果
-                tabsContainer.style.boxShadow =
-                  "0 4px 16px rgba(0, 0, 0, 0.12)";
-              } else {
-                // 回到顶部时，恢复原始样式
-                tabsContainer.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.05)";
-              }
-            }
-            ticking = false;
-          });
-          ticking = true;
+        // 处理标签页导航栏吸顶效果
+        const tabsHeader = document.querySelector(".el-tabs__header");
+        if (tabsHeader) {
+          const rect = tabsHeader.getBoundingClientRect();
+          if (rect.top <= 0) {
+            tabsHeader.classList.add("is-stuck");
+          } else {
+            tabsHeader.classList.remove("is-stuck");
+          }
         }
+
+        // 处理卡片工具栏吸顶效果
+        const cards = document.querySelectorAll(".sticky-card");
+        cards.forEach((card) => {
+          const header = card.querySelector(".el-card__header");
+          if (header) {
+            const rect = header.getBoundingClientRect();
+            // 标签页导航栏的高度约为 60px，需要考虑这个偏移
+            const tabsHeaderHeight = tabsHeader ? tabsHeader.offsetHeight : 0;
+            if (rect.top <= tabsHeaderHeight) {
+              header.classList.add("is-stuck");
+            } else {
+              header.classList.remove("is-stuck");
+            }
+          }
+        });
       };
 
-      // 添加滚动监听
-      window.addEventListener("scroll", handleScroll, { passive: true });
+      window.addEventListener("scroll", handleScroll, true);
 
-      // 存储清理函数
-      window.tabsScrollHandler = handleScroll;
+      // 清理函数
+      onBeforeUnmount(() => {
+        window.removeEventListener("scroll", handleScroll, true);
+      });
     });
 
     // 组件卸载前清理 ECharts 实例
     onBeforeUnmount(() => {
       cleanupPieChart();
-
-      // 清理滚动监听器
-      if (window.tabsScrollHandler) {
-        window.removeEventListener("scroll", window.tabsScrollHandler);
-        delete window.tabsScrollHandler;
-      }
     });
 
     // 组件激活时（从其他路由返回）
@@ -3714,7 +3919,10 @@ export default {
       // 原有的方法...
 
       // 高级查询方法
+      onTableChange,
       getTableColumns,
+      addTable,
+      removeTable,
       addCondition,
       removeCondition,
       executeQuery,
@@ -3805,7 +4013,6 @@ export default {
       // 跨表更新相关
       updateConditions,
       updateFieldForm,
-      updateSettings,
       updateResult,
       updateLoading,
       addUpdateCondition,
@@ -3858,18 +4065,15 @@ export default {
   padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
-  min-height: 100vh;
-  overflow: visible;
+  overflow: visible !important;
 }
 
-/* 标签页样式美化 - 简洁专业风格，支持吸顶效果 */
+/* 标签页样式美化 - 简洁专业风格 */
 :deep(.el-tabs) {
   border-radius: 8px;
   overflow: visible;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   background: #ffffff;
-  border: 1px solid #e4e7ed;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 :deep(.el-tabs__header) {
@@ -3880,11 +4084,13 @@ export default {
   position: sticky;
   top: 0;
   z-index: 1000;
-  backdrop-filter: blur(8px);
-  background: rgba(250, 251, 252, 0.95);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px 8px 0 0;
+  transition: box-shadow 0.3s ease;
+}
+
+/* 滚动时为标签页导航栏添加阴影 */
+:deep(.el-tabs__header.is-stuck) {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  border-bottom: 2px solid #409eff;
 }
 
 :deep(.el-tabs__nav-wrap) {
@@ -3898,24 +4104,20 @@ export default {
   color: #606266;
   border-radius: 6px 6px 0 0;
   margin-right: 4px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   border: none;
   position: relative;
-  cursor: pointer;
 }
 
 :deep(.el-tabs__item:hover) {
   color: #303133;
   background-color: #f5f7fa;
-  transform: translateY(-1px);
 }
 
 :deep(.el-tabs__item.is-active) {
   color: #409eff;
   background: #ffffff;
   font-weight: 600;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15);
 }
 
 :deep(.el-tabs__item.is-active::after) {
@@ -3928,19 +4130,12 @@ export default {
   height: 3px;
   background: #409eff;
   border-radius: 3px 3px 0 0;
-  box-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
 }
 
 :deep(.el-tabs__content) {
   padding: 20px;
   background: #ffffff;
   overflow: visible;
-  min-height: calc(100vh - 40px);
-  border-radius: 0 0 8px 8px;
-  border: 1px solid #e4e7ed;
-  border-top: none;
-  margin-top: -1px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .el-card {
@@ -3963,10 +4158,23 @@ export default {
   color: #303133;
 }
 
+/* 数据管理卡片的header启用吸顶 */
+.sticky-card :deep(.el-card__header) {
+  position: sticky;
+  top: 60px; /* 标签页导航栏的高度 */
+  z-index: 100;
+  background: #fafbfc;
+  transition: box-shadow 0.3s ease;
+}
+
 .tab-content {
   padding: 0;
   overflow: visible;
-  min-height: 100%;
+}
+
+.section-card {
+  overflow: visible;
+  margin-bottom: 20px;
 }
 
 .action-buttons {
@@ -4000,10 +4208,24 @@ export default {
   clear: both;
 }
 
+.section-title {
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e4e7ed;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* 滚动时为吸顶的header添加阴影效果 */
+.sticky-card :deep(.el-card__header.is-stuck) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 :deep(.el-table) {
@@ -4304,6 +4526,19 @@ export default {
 }
 
 /* 修改详情表格样式 - 优化版 */
+.comparison-header {
+  margin-bottom: 20px;
+  padding: 12px 15px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e1f5fe 100%);
+  border-radius: 8px;
+  border-left: 4px solid #409eff;
+}
+
+.comparison-header h4 {
+  margin: 0;
+  color: #409eff;
+  font-size: 16px;
+}
 
 .comparison-table {
   width: 100%;
@@ -4578,53 +4813,5 @@ export default {
 
 .database-manager * {
   box-sizing: border-box;
-}
-
-/* 确保整个页面布局正常 */
-html,
-body {
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-}
-
-/* 确保卡片内容不被裁剪 */
-.section-card,
-.subsection-card {
-  overflow: visible !important;
-}
-
-/* 吸顶效果优化 */
-:deep(.el-tabs__nav-scroll) {
-  overflow: visible !important;
-}
-
-:deep(.el-tabs__nav) {
-  overflow: visible !important;
-}
-
-/* 确保sticky定位正常工作 */
-:deep(.el-tabs__header) {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 1000 !important;
-}
-
-/* 调试样式 - 可以在开发者工具中查看效果 */
-.tabs-sticky-debug {
-  position: sticky;
-  top: 0;
-  background: yellow;
-  padding: 10px;
-  z-index: 9999;
-}
-
-/* 表格容器滚动优化 */
-.el-table {
-  overflow: visible !important;
-}
-
-.el-table__body-wrapper {
-  overflow-x: auto;
-  overflow-y: auto;
 }
 </style>
